@@ -1,1 +1,0 @@
-# Replanteo_de_Curvas
