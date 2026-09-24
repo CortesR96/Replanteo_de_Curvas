@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0284c7" />
+  <title>TopoCurvas PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 60px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    
+    header { text-align: center; margin-bottom: 12px; }
+    h1 { font-size: 1.25rem; color: #38bdf8; }
+    .sub { font-size: 0.75rem; color: var(--muted); }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .card-title { font-size: 0.85rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .full { grid-column: span 2; }
+
+    label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
+    input, select { width: 100%; padding: 8px; background: #0b1120; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.9rem; outline: none; }
+    input:focus, select:focus { border-color: var(--accent); }
+
+    /* Resultados geométricos */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .kpi { background: #0b1120; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
+    .kpi-label { font-size: 0.65rem; color: var(--muted); display: block; }
+    .kpi-val { font-size: 0.9rem; font-weight: bold; color: #38bdf8; }
+
+    /* Botones */
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; display: block; }
+    .btn-exp { background: var(--success); color: #fff; margin-top: 8px; }
+    .btn-sec { background: var(--border); color: var(--text); margin-top: 6px; font-size: 0.75rem; padding: 6px; }
+
+    /* Módulo Inverso */
+    .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-top: 8px; display: inline-block; }
+    .status-in { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+    .status-out { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #b91c1c; }
+
+    /* Tablas */
+    .table-container { overflow-x: auto; max-height: 250px; margin-top: 10px; border: 1px solid var(--border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: right; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    th { background: #141e33; color: var(--muted); position: sticky; top: 0; }
+    th:first-child, td:first-child { text-align: left; }
+    .tag { font-size: 0.65rem; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+    .tag-pc { background: #0284c7; }
+    .tag-pt { background: #9333ea; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Replanteo de Curvas Circulares</h1>
+    <div class="sub">Cálculo en tiempo real • Offline • PWA</div>
+  </header>
+
+  <!-- 1. PARÁMETROS GEOMÉTRICOS -->
+  <div class="card">
+    <div class="card-title">1. Parámetros de Diseño</div>
+    <div class="grid">
+      <div>
+        <label>Norte PI (m)</label>
+        <input type="number" id="nPI" step="0.001" />
+      </div>
+      <div>
+        <label>Este PI (m)</label>
+        <input type="number" id="ePI" step="0.001" />
+      </div>
+      <div>
+        <label>Azimut Entrada (°)</label>
+        <input type="number" id="azIn" step="0.0001" placeholder="Ej: 45.2530" />
+      </div>
+      <div>
+        <label>Deflexión Δ (°)</label>
+        <input type="number" id="delta" step="0.0001" placeholder="Ej: 62.5000" />
+      </div>
+      <div>
+        <label>Sentido Curva</label>
+        <select id="sentido">
+          <option value="D">Derecha (D)</option>
+          <option value="I">Izquierda (I)</option>
+        </select>
+      </div>
+      <div>
+        <label>Radio R (m)</label>
+        <input type="number" id="radio" step="0.01" />
+      </div>
+      <div>
+        <label>Abscisa PI (m)</label>
+        <input type="number" id="kPI" step="0.01" placeholder="Ej: 1250.00" />
+      </div>
+      <div>
+        <label>Intervalo Estacas (m)</label>
+        <input type="number" id="intervalo" step="1" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ELEMENTOS CALCULADOS -->
+  <div class="card">
+    <div class="card-title">2. Geometría de la Curva</div>
+    <div class="kpi-grid">
+      <div class="kpi"><span class="kpi-label">Subtangente (T)</span><span class="kpi-val" id="lblT">0.000 m</span></div>
+      <div class="kpi"><span class="kpi-label">Longitud (L)</span><span class="kpi-val" id="lblL">0.000 m</span></div>
+      <div class="kpi"><span class="kpi-label">Cuerda Larga (CL)</span><span class="kpi-val" id="lblCL">0.000 m</span></div>
+      <div class="kpi"><span class="kpi-label">Externa (E)</span><span class="kpi-val" id="lblE">0.000 m</span></div>
+      <div class="kpi"><span class="kpi-label">Abscisa PC</span><span class="kpi-val" id="lblPC">K0+000.00</span></div>
+      <div class="kpi"><span class="kpi-label">Abscisa PT</span><span class="kpi-val" id="lblPT">K0+000.00</span></div>
+    </div>
+  </div>
+
+  <!-- 3. MÓDULO INVERSO: COORDENADA -> ABSCISA Y DESPLAZAMIENTO -->
+  <div class="card">
+    <div class="card-title">3. Abscisa y Desplazamiento desde Punto</div>
+    <div class="grid">
+      <div>
+        <label>Norte Punto (m)</label>
+        <input type="number" id="nPtoInv" step="0.001" placeholder="Ej: 1045.20" />
+      </div>
+      <div>
+        <label>Este Punto (m)</label>
+        <input type="number" id="ePtoInv" step="0.001" placeholder="Ej: 980.50" />
+      </div>
+    </div>
+    
+    <div id="invResult" style="margin-top: 8px; display: none;">
+      <div class="kpi-grid">
+        <div class="kpi"><span class="kpi-label">Abscisa Proyectada</span><span class="kpi-val" id="lblInvK">--</span></div>
+        <div class="kpi"><span class="kpi-label">Desplazamiento / Ord.</span><span class="kpi-val" id="lblInvOffset">--</span></div>
+      </div>
+      <div id="lblInvStatus" class="status-badge"></div>
+    </div>
+  </div>
+
+  <!-- 4. CARTERA DE PUNTOS Y EXPORTACIÓN -->
+  <div class="card">
+    <div class="card-title">
+      <span>4. Cartera de Replanteo</span>
+      <span style="font-size: 0.7rem; color: var(--muted);" id="lblTotalPtos">0 ptos</span>
+    </div>
+    <button class="btn btn-exp" onclick="exportarCSV()">Exportar CSV (Pto, Norte, Este, Z, Código)</button>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Pto</th>
+            <th>Abscisa</th>
+            <th>Norte</th>
+            <th>Este</th>
+            <th>Deflexión</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Constantes y Estado
+  const toRad = deg => (deg * Math.PI) / 180;
+  const toDeg = rad => (rad * 180) / Math.PI;
+
+  const defaults = {
+    nPI: 1000.000,
+    ePI: 1000.000,
+    azIn: 45.0000,
+    delta: 50.0000,
+    sentido: 'D',
+    radio: 80.00,
+    kPI: 150.00,
+    intervalo: 10
+  };
+
+  let geo = {};
+  let puntosLista = [];
+
+  // 1. Cargar y Guardar en LocalStorage
+  function cargarDatos() {
+    const guardado = localStorage.getItem('topocurvas_data');
+    const data = guardado ? JSON.parse(guardado) : defaults;
+
+    document.getElementById('nPI').value = data.nPI;
+    document.getElementById('ePI').value = data.ePI;
+    document.getElementById('azIn').value = data.azIn;
+    document.getElementById('delta').value = data.delta;
+    document.getElementById('sentido').value = data.sentido;
+    document.getElementById('radio').value = data.radio;
+    document.getElementById('kPI').value = data.kPI;
+    document.getElementById('intervalo').value = data.intervalo;
+
+    const inv = JSON.parse(localStorage.getItem('topocurvas_inv') || '{}');
+    if (inv.n) document.getElementById('nPtoInv').value = inv.n;
+    if (inv.e) document.getElementById('ePtoInv').value = inv.e;
+  }
+
+  function guardarDatos() {
+    const data = {
+      nPI: parseFloat(document.getElementById('nPI').value) || 0,
+      ePI: parseFloat(document.getElementById('ePI').value) || 0,
+      azIn: parseFloat(document.getElementById('azIn').value) || 0,
+      delta: parseFloat(document.getElementById('delta').value) || 0,
+      sentido: document.getElementById('sentido').value,
+      radio: parseFloat(document.getElementById('radio').value) || 1,
+      kPI: parseFloat(document.getElementById('kPI').value) || 0,
+      intervalo: parseFloat(document.getElementById('intervalo').value) || 10
+    };
+    localStorage.setItem('topocurvas_data', JSON.stringify(data));
+    return data;
+  }
+
+  // 2. Motor de cálculo de curva
+  function calcular() {
+    const d = guardarDatos();
+    if (d.radio <= 0 || d.delta <= 0) return;
+
+    const radDelta = toRad(d.delta);
+    const T = d.radio * Math.tan(radDelta / 2);
+    const L = (Math.PI * d.radio * d.delta) / 180;
+    const CL = 2 * d.radio * Math.sin(radDelta / 2);
+    const E = d.radio * ((1 / Math.cos(radDelta / 2)) - 1);
+
+    const kPC = d.kPI - T;
+    const kPT = kPC + L;
+
+    // Coordenadas PC
+    const azContraIn = (d.azIn + 180) % 360;
+    const nPC = d.nPI + T * Math.cos(toRad(azContraIn));
+    const ePC = d.ePI + T * Math.sin(toRad(azContraIn));
+
+    // Centro de Curvatura
+    const signo = (d.sentido === 'D') ? 1 : -1;
+    const azCentro = (d.azIn + (signo * 90) + 360) % 360;
+    const nCentro = nPC + d.radio * Math.cos(toRad(azCentro));
+    const eCentro = ePC + d.radio * Math.sin(toRad(azCentro));
+
+    // PT
+    const azOut = (d.azIn + (signo * d.delta) + 360) % 360;
+    const nPT = d.nPI + T * Math.cos(toRad(azOut));
+    const ePT = d.ePI + T * Math.sin(toRad(azOut));
+
+    // Guardar variables globales para el módulo inverso
+    geo = { T, L, CL, E, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, R: d.radio, signo, azIn: d.azIn, delta: d.delta };
+
+    // Actualizar KPIs
+    document.getElementById('lblT').textContent = `${T.toFixed(3)} m`;
+    document.getElementById('lblL').textContent = `${L.toFixed(3)} m`;
+    document.getElementById('lblCL').textContent = `${CL.toFixed(3)} m`;
+    document.getElementById('lblE').textContent = `${E.toFixed(3)} m`;
+    document.getElementById('lblPC').textContent = `K${(kPC / 1000).toFixed(3)}`;
+    document.getElementById('lblPT').textContent = `K${(kPT / 1000).toFixed(3)}`;
+
+    generarCartera(d, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, signo);
+    calcularInverso();
+  }
+
+  // 3. Cartera de Puntos para replanteo
+  function generarCartera(d, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, signo) {
+    puntosLista = [];
+    const tbody = document.getElementById('tablaBody');
+    tbody.innerHTML = '';
+
+    // PC
+    puntosLista.push({ id: 1, tipo: 'PC', k: kPC, n: nPC, e: ePC, defl: '00°00\'00"' });
+
+    let kActual = Math.ceil(kPC / d.intervalo) * d.intervalo;
+    let idx = 2;
+
+    const azRadioPC = (geo.azIn + (signo * 90) + 180 + 360) % 360; // Del centro al PC
+
+    while (kActual < kPT) {
+      const s = kActual - kPC;
+      const theta = toDeg(s / d.radio);
+      const azRadial = (azRadioPC + (signo * theta) + 360) % 360;
+
+      const nPto = nCentro + d.radio * Math.cos(toRad(azRadial));
+      const ePto = eCentro + d.radio * Math.sin(toRad(azRadial));
+
+      const defl = theta / 2;
+      const deflTxt = formatGMS(defl);
+
+      puntosLista.push({ id: idx++, tipo: 'ESTACA', k: kActual, n: nPto, e: ePto, defl: deflTxt });
+      kActual += d.intervalo;
+    }
+
+    // PT
+    const deflPT = d.delta / 2;
+    puntosLista.push({ id: idx, tipo: 'PT', k: kPT, n: nPT, e: ePT, defl: formatGMS(deflPT) });
+
+    document.getElementById('lblTotalPtos').textContent = `${puntosLista.length} puntos`;
+
+    // Renderizar
+    puntosLista.forEach(p => {
+      const tr = document.createElement('tr');
+      const tag = p.tipo === 'PC' ? '<span class="tag tag-pc">PC</span>' : (p.tipo === 'PT' ? '<span class="tag tag-pt">PT</span>' : '');
+      tr.innerHTML = `
+        <td>${p.id} ${tag}</td>
+        <td>K${(p.k).toFixed(2)}</td>
+        <td>${p.n.toFixed(3)}</td>
+        <td>${p.e.toFixed(3)}</td>
+        <td>${p.defl}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 4. Módulo Inverso: Punto -> Abscisa y Desplazamiento (Offset)
+  function calcularInverso() {
+    const n = parseFloat(document.getElementById('nPtoInv').value);
+    const e = parseFloat(document.getElementById('ePtoInv').value);
+    const resBox = document.getElementById('invResult');
+
+    if (isNaN(n) || isNaN(e) || !geo.R) {
+      resBox.style.display = 'none';
+      return;
+    }
+
+    localStorage.setItem('topocurvas_inv', JSON.stringify({ n, e }));
+    resBox.style.display = 'block';
+
+    // Vector desde el centro de la curva hacia el punto
+    const dn = n - geo.nCentro;
+    const de = e - geo.eCentro;
+    const distCentro = Math.hypot(dn, de);
+
+    // Azimut del centro hacia el punto
+    let azRadialPto = toDeg(Math.atan2(de, dn));
+    if (azRadialPto < 0) azRadialPto += 360;
+
+    // Azimut del centro hacia el PC
+    let azCentroPC = toDeg(Math.atan2(geo.ePC - geo.eCentro, geo.nPC - geo.nCentro));
+    if (azCentroPC < 0) azCentroPC += 360;
+
+    // Diferencia angular en el sentido de la curva
+    let diffAng = (geo.signo === 1) ? (azRadialPto - azCentroPC) : (azCentroPC - azRadialPto);
+    diffAng = (diffAng + 360) % 360;
+
+    // Longitud de arco desde PC
+    const sProy = toRad(diffAng) * geo.R;
+    const kProy = geo.kPC + sProy;
+
+    // Desplazamiento / Ordenada (Offset respecto al eje)
+    // Positivo a la derecha del alineamiento, negativo a la izquierda
+    const offset = (geo.signo === 1) ? (distCentro - geo.R) : (geo.R - distCentro);
+
+    document.getElementById('lblInvK').textContent = `K${kProy.toFixed(2)}`;
+    document.getElementById('lblInvOffset').textContent = `${offset >= 0 ? '+' : ''}${offset.toFixed(3)} m ${offset >= 0 ? '(Der)' : '(Izq)'}`;
+
+    // Verificación de rango entre PC y PT
+    const status = document.getElementById('lblInvStatus');
+    if (kProy >= (geo.kPC - 0.001) && kProy <= (geo.kPT + 0.001)) {
+      status.textContent = '✓ DENTRO DEL RANGO DE LA CURVA (PC - PT)';
+      status.className = 'status-badge status-in';
+    } else {
+      status.textContent = '✕ FUERA DEL RANGO DE PC Y PT';
+      status.className = 'status-badge status-out';
+    }
+  }
+
+  function formatGMS(gradosDec) {
+    const g = Math.floor(gradosDec);
+    const mDec = (gradosDec - g) * 60;
+    const m = Math.floor(mDec);
+    const s = Math.round((mDec - m) * 60);
+    return `${g}°${String(m).padStart(2, '0')}'${String(s).padStart(2, '0')}"`;
+  }
+
+  function exportarCSV() {
+    if (!puntosLista.length) return;
+    let csv = "Punto,Norte,Este,Cota,Codigo\n";
+    puntosLista.forEach(p => {
+      csv += `${p.id},${p.n.toFixed(4)},${p.e.toFixed(4)},0.000,${p.tipo}_K${p.k.toFixed(1)}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Replanteo_Curva_R${geo.R}.csv`;
+    link.click();
+  }
+
+  // Registro Reactivo en todos los inputs
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', () => {
+      if (el.id === 'nPtoInv' || el.id === 'ePtoInv') {
+        calcularInverso();
+      } else {
+        calcular();
+      }
+    });
+  });
+
+  // Registrar Service Worker para PWA Offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+    });
+  }
+
+  // Inicializar
+  cargarDatos();
+  calcular();
+</script>
+</body>
+</html>
