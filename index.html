@@ -6,35 +6,35 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="theme-color" content="#1a2218" />
+  <meta name="theme-color" content="#141a13" />
   <title>TOPO VIAS CR</title>
   <link rel="manifest" href="manifest.json" />
   <style>
     :root {
-      --bg: #111710;
-      --card: #182216;
-      --card-alt: #1e2b1c;
-      --accent: #7ca847;
-      --accent-hover: #91be56;
+      --bg: #141a13;
+      --card: #1c241a;
+      --card-alt: #232d20;
+      --accent: #84a958;
+      --accent-hover: #98bf68;
       --text: #e2e8df;
       --muted: #8b9c87;
-      --border: #2c3d28;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --success: #16a34a;
+      --border: #2f3d2b;
+      --warning: #eab308;
+      --danger: #ef4444;
+      --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 70px; }
     .container { max-width: 650px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 12px; position: relative; }
-    h1 { font-size: 1.35rem; color: var(--accent); letter-spacing: 0.5px; }
-    .sub { font-size: 0.72rem; color: var(--muted); }
     
-    .btn-sync {
-      position: absolute; right: 0; top: 0;
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    h1 { font-size: 1.25rem; color: var(--accent); letter-spacing: 0.5px; }
+    .sub { font-size: 0.7rem; color: var(--muted); }
+    
+    .btn-header {
       background: var(--card-alt); border: 1px solid var(--border);
-      color: var(--accent); font-size: 0.7rem; padding: 4px 8px;
-      border-radius: 4px; cursor: pointer;
+      color: var(--accent); font-size: 0.72rem; padding: 6px 10px;
+      border-radius: 6px; cursor: pointer; font-weight: bold;
     }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
@@ -46,12 +46,29 @@
     input:focus, select:focus { border-color: var(--accent); }
 
     .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; text-align: center; }
-    .btn-primary { background: var(--accent); color: #0c120b; margin-top: 8px; }
+    .btn-primary { background: var(--accent); color: #0c120b; }
     .btn-secondary { background: var(--card-alt); color: var(--text); border: 1px solid var(--border); }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-sm { padding: 4px 8px; font-size: 0.7rem; width: auto; }
 
-    /* Tabs */
+    /* Tarjetas de Proyecto con Hover y clic directo */
+    .project-card {
+      background: #0c120b; padding: 12px; border-radius: 6px; margin-bottom: 8px;
+      border: 1px solid var(--border); display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    }
+    .project-card:hover {
+      background: #182216; border-color: var(--accent);
+    }
+    .btn-icon-del {
+      background: transparent; border: none; color: var(--muted); cursor: pointer;
+      padding: 6px 10px; border-radius: 4px; display: flex; align-items: center;
+    }
+    .btn-icon-del:hover {
+      background: rgba(239, 68, 68, 0.2); color: var(--danger);
+    }
+
+    /* Pestañas */
     .tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--card); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
     .tab-btn { flex: 1; padding: 8px 4px; font-size: 0.72rem; font-weight: bold; background: transparent; color: var(--muted); border: none; border-radius: 5px; cursor: pointer; }
     .tab-btn.active { background: var(--accent); color: #0c120b; }
@@ -62,11 +79,15 @@
     .kpi-label { font-size: 0.65rem; color: var(--muted); display: block; }
     .kpi-val { font-size: 0.88rem; font-weight: bold; color: var(--accent); }
 
-    /* Replanteo Status */
-    .stake-box { text-align: center; padding: 14px; border-radius: 6px; font-weight: bold; margin-top: 8px; font-size: 1.1rem; }
-    .box-match { background: rgba(22, 163, 74, 0.2); color: #4ade80; border: 1px solid var(--success); }
-    .box-approach { background: rgba(217, 119, 6, 0.2); color: #fbbf24; border: 1px solid var(--warning); }
-    .box-away { background: rgba(220, 38, 38, 0.2); color: #f87171; border: 1px solid var(--danger); }
+    /* Replanteo */
+    .stake-box { text-align: center; padding: 14px; border-radius: 6px; font-weight: bold; margin-top: 8px; font-size: 1.05rem; }
+    .box-match { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid var(--success); }
+    .box-approach { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid var(--warning); }
+    .box-away { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid var(--danger); }
+
+    .quick-nodes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .quick-btn { background: #0c120b; border: 1px solid var(--border); color: var(--accent); font-size: 0.68rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+    .quick-btn:hover { background: var(--card-alt); }
 
     /* Tablas */
     .table-container { overflow-x: auto; max-height: 280px; margin-top: 8px; border: 1px solid var(--border); border-radius: 6px; }
@@ -75,11 +96,19 @@
     th { background: var(--card-alt); color: var(--muted); position: sticky; top: 0; }
     th:first-child, td:first-child { text-align: left; }
 
+    /* Notificaciones Flotantes (Toast) */
+    #toast {
+      display: none; position: fixed; bottom: 65px; left: 50%;
+      transform: translateX(-50%); background: #232d20; color: var(--text);
+      padding: 8px 16px; border-radius: 6px; font-size: 0.78rem; font-weight: bold;
+      border: 1px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.6); z-index: 10001;
+    }
+
     /* Banner Actualización */
     #updateBanner {
-      display: none; position: fixed; bottom: 15px; left: 50%;
+      display: none; position: fixed; bottom: 12px; left: 50%;
       transform: translateX(-50%); background: var(--accent); color: #0c120b;
-      padding: 10px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: bold;
+      padding: 8px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: bold;
       box-shadow: 0 4px 15px rgba(0,0,0,0.6); z-index: 10000; align-items: center; gap: 8px;
     }
   </style>
@@ -88,30 +117,39 @@
 
 <div class="container">
   <header>
-    <h1>TOPO VIAS CR</h1>
-    <div class="sub">Replanteo Geométrico Vial • Offline</div>
-    <button class="btn-sync" onclick="forzarActualizacion()">🔄 Actualizar</button>
+    <div>
+      <h1>TOPO VIAS CR</h1>
+      <div class="sub">Replanteo Geométrico de Vías</div>
+    </div>
+    <div style="display: flex; gap: 6px;">
+      <button id="btnHeaderCrear" class="btn-header" onclick="mostrarModalCrear()">+ Nueva Vía</button>
+      <button class="btn-header" onclick="forzarActualizacion()">🔄</button>
+    </div>
   </header>
 
   <!-- VISTA 1: PROYECTOS -->
   <div id="viewProyectos">
-    <div class="card">
-      <div class="card-title">Vías Registradas</div>
-      <div id="listaProyectos"></div>
-      <div id="emptyMsg" style="text-align: center; color: var(--muted); font-size: 0.8rem; padding: 20px 0; display: none;">
-        No hay vías guardadas. Crea una nueva para iniciar.
+    <!-- Formulario para crear proyecto (oculto por defecto o visible al tocar + Nueva Vía) -->
+    <div id="cardCrearProyecto" class="card" style="display: none;">
+      <div class="card-title">
+        <span>Crear Nueva Vía</span>
+        <button class="btn btn-secondary btn-sm" onclick="mostrarModalCrear(false)">✕</button>
       </div>
+      <div class="grid">
+        <div class="full">
+          <label>Nombre del Proyecto / Vía</label>
+          <input type="text" id="nuevoNombreVia" placeholder="Ej: Vía Variante K0 a K2" />
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 8px;" onclick="crearProyecto()">Guardar y Comenzar</button>
     </div>
 
     <div class="card">
-      <div class="card-title">Crear Nueva Vía</div>
-      <div class="grid">
-        <div class="full">
-          <label>Nombre de la Vía / Proyecto</label>
-          <input type="text" id="nuevoNombreVia" placeholder="Ej: Tramo Veredal Sector 1" />
-        </div>
+      <div class="card-title">Vías Guardadas</div>
+      <div id="listaProyectos"></div>
+      <div id="emptyMsg" style="text-align: center; color: var(--muted); font-size: 0.8rem; padding: 25px 0; display: none;">
+        No hay vías guardadas. Toca <strong>"+ Nueva Vía"</strong> arriba a la derecha para iniciar.
       </div>
-      <button class="btn btn-primary" onclick="crearProyecto()">+ Guardar Vía</button>
     </div>
   </div>
 
@@ -168,6 +206,8 @@
     <div id="tab2" style="display:none;">
       <div class="card">
         <div class="card-title">Estación Armada</div>
+        <label>Cargar Punto Rápido:</label>
+        <div id="quickNodesContainer" class="quick-nodes"></div>
         <div class="grid">
           <div>
             <label>Norte Estación</label>
@@ -265,6 +305,8 @@
   </div>
 </div>
 
+<div id="toast"></div>
+
 <!-- Banner de Actualización -->
 <div id="updateBanner">
   <span>⚡ ¡Nueva versión disponible!</span>
@@ -280,6 +322,25 @@
 
   function persist() {
     localStorage.setItem('topovias_cr_db', JSON.stringify(DB));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2600);
+  }
+
+  function mostrarModalCrear(forzar) {
+    const card = document.getElementById('cardCrearProyecto');
+    if (forzar !== undefined) {
+      card.style.display = forzar ? 'block' : 'none';
+    } else {
+      card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    }
+    if (card.style.display === 'block') {
+      document.getElementById('nuevoNombreVia').focus();
+    }
   }
 
   // GESTIÓN DE PROYECTOS
@@ -298,416 +359,83 @@
     keys.forEach(k => {
       const p = DB.proyectos[k];
       const div = document.createElement('div');
-      div.style.background = '#0c120b';
-      div.style.padding = '10px';
-      div.style.borderRadius = '6px';
-      div.style.marginBottom = '6px';
-      div.style.border = '1px solid var(--border)';
-      div.style.display = 'flex';
-      div.style.justifyContent = 'space-between';
-      div.style.alignItems = 'center';
+      div.className = 'project-card';
+      div.onclick = () => abrirProyecto(k);
 
       div.innerHTML = `
         <div>
-          <strong style="color:var(--accent); font-size:0.85rem;">${p.nombre}</strong>
+          <strong style="color:var(--accent); font-size:0.88rem;">${p.nombre}</strong>
           <div style="font-size:0.7rem; color:var(--muted);">${p.pis ? p.pis.length : 0} PIs definidos</div>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-primary btn-sm" onclick="abrirProyecto('${k}')">Abrir</button>
-          <button class="btn btn-danger btn-sm" onclick="eliminarProyecto('${k}')">Borrar</button>
-        </div>
-      `;
-      cont.appendChild(div);
-    });
-  }
+        <div>
+          <button class="btn-icon-del" title="Eliminar vía" onclick="event.stopPropagation(); eliminarProyecto('${k}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14Hubo un bloqueo temporal automático del filtro del sistema en los mensajes anteriores, pero ya estamos de vuelta sin problema.
 
-  function crearProyecto() {
-    const nom = document.getElementById('nuevoNombreVia').value.trim();
-    if (!nom) return;
-    const id = 'via_' + Date.now();
-    DB.proyectos[id] = {
-      nombre: nom,
-      nK0: 1000.0,
-      eK0: 1000.0,
-      absIni: 0.0,
-      pis: []
-    };
-    document.getElementById('nuevoNombreVia').value = '';
-    persist();
-    renderProyectos();
-  }
+Los dos archivos que se ajustaron para corregir los errores son **`sw.js`** e **`index.html`**:
 
-  function eliminarProyecto(id) {
-    if (confirm('¿Eliminar esta vía y toda su información?')) {
-      delete DB.proyectos[id];
-      if (DB.activo === id) DB.activo = null;
-      persist();
-      renderProyectos();
-    }
-  }
+1. **En `sw.js`:** Se eliminó una URL externa innecesaria (`cdn.tailwindcss.com`) que hacía fallar el caché (`caches.addAll`) si no había internet o si el navegador bloqueaba llamadas externas, impidiendo que el Service Worker se instalara.
+2. **En `index.html`:** Se reemplazó el `alert()` del navegador (que en móviles o visores web se bloquea por seguridad) por un aviso visual táctico en pantalla (`showToast`), además de asegurar que la tarjeta de proyecto se abra con solo tocarla (con efecto sombreado) y el icono de basura para borrar.
 
-  function abrirProyecto(id) {
-    DB.activo = id;
-    persist();
-    const p = DB.proyectos[id];
-    document.getElementById('txtNombreViaActiva').textContent = p.nombre;
-    document.getElementById('nK0').value = p.nK0;
-    document.getElementById('eK0').value = p.eK0;
-    document.getElementById('absIni').value = p.absIni;
-    document.getElementById('viewProyectos').style.display = 'none';
-    document.getElementById('viewDetalle').style.display = 'block';
-    renderPIs();
-    actualizarGeometria();
-  }
+Aquí tienes los códigos completos y limpios para que los pegues directamente:
 
-  function volverAProyectos() {
-    DB.activo = null;
-    persist();
-    document.getElementById('viewDetalle').style.display = 'none';
-    document.getElementById('viewProyectos').style.display = 'block';
-    renderProyectos();
-  }
+---
 
-  // PIs Y GEOMETRÍA
-  function renderPIs() {
-    const p = DB.proyectos[DB.activo];
-    const cont = document.getElementById('contenedorPIs');
-    cont.innerHTML = '';
+### 1. `sw.js` (Limpio, sin dependencias externas y con recarga inmediata)
 
-    p.pis.forEach((pi, i) => {
-      const box = document.createElement('div');
-      box.style.background = '#0c120b';
-      box.style.padding = '8px';
-      box.style.borderRadius = '6px';
-      box.style.marginBottom = '6px';
-      box.style.border = '1px solid var(--border)';
+```javascript
+// CADA VEZ QUE SUBAS UN CAMBIO A GITHUB, SUBE ESTE NÚMERO (v2.0.1, v2.0.2, etc.)
+const CACHE_NAME = 'topovias-cr-v2.0.2';
 
-      box.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-          <span style="font-size:0.75rem; font-weight:bold; color:var(--accent);">PI ${i+1}</span>
-          <button class="btn btn-danger btn-sm" onclick="borrarPI(${i})">X</button>
-        </div>
-        <div class="grid">
-          <div><label>Norte PI</label><input type="number" step="0.001" value="${pi.n}" oninput="editPI(${i},'n',this.value)"></div>
-          <div><label>Este PI</label><input type="number" step="0.001" value="${pi.e}" oninput="editPI(${i},'e',this.value)"></div>
-          <div class="full"><label>Radio R (m)</label><input type="number" step="0.1" value="${pi.r}" oninput="editPI(${i},'r',this.value)"></div>
-        </div>
-      `;
-      cont.appendChild(box);
-    });
-  }
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json'
+];
 
-  function agregarPI() {
-    const p = DB.proyectos[DB.activo];
-    p.pis.push({ n: 1000 + (p.pis.length + 1)*50, e: 1000 + (p.pis.length + 1)*50, r: 50 });
-    persist();
-    renderPIs();
-    actualizarGeometria();
-  }
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
+});
 
-  function borrarPI(i) {
-    const p = DB.proyectos[DB.activo];
-    p.pis.splice(i, 1);
-    persist();
-    renderPIs();
-    actualizarGeometria();
-  }
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((k) => {
+          if (k !== CACHE_NAME) return caches.delete(k);
+        })
+      );
+    })
+  );
+  return self.clients.claim();
+});
 
-  function editPI(i, key, val) {
-    const p = DB.proyectos[DB.activo];
-    p.pis[i][key] = parseFloat(val) || 0;
-    persist();
-    actualizarGeometria();
-  }
+// Network-First: Siempre intenta buscar la versión fresca en GitHub si hay red
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+  if (!e.request.url.startsWith('http')) return;
 
-  let alineamiento = [];
-
-  function actualizarGeometria() {
-    const p = DB.proyectos[DB.activo];
-    if (!p) return;
-    p.nK0 = parseFloat(document.getElementById('nK0').value) || 0;
-    p.eK0 = parseFloat(document.getElementById('eK0').value) || 0;
-    p.absIni = parseFloat(document.getElementById('absIni').value) || 0;
-    persist();
-
-    alineamiento = [];
-    const curvasRes = document.getElementById('resumenCurvas');
-    carteraPuntos = [];
-
-    let puntosControl = [{ n: p.nK0, e: p.eK0, esK0: true }, ...p.pis];
-    if (puntosControl.length < 3) {
-      curvasRes.innerHTML = 'Se requieren al menos 2 PIs después de K0 para definir una curva.';
-      renderCartera();
-      return;
-    }
-
-    curvasRes.innerHTML = '';
-    let kActual = p.absIni;
-    carteraPuntos.push({ id: 1, k: kActual, n: p.nK0, e: p.eK0, tipo: 'K0' });
-
-    for (let i = 1; i < puntosControl.length - 1; i++) {
-      const pPrev = puntosControl[i - 1];
-      const pi = puntosControl[i];
-      const pNext = puntosControl[i + 1];
-
-      // Azimuts
-      let azIn = toDeg(Math.atan2(pi.e - pPrev.e, pi.n - pPrev.n)); if (azIn < 0) azIn += 360;
-      let azOut = toDeg(Math.atan2(pNext.e - pi.e, pNext.n - pi.n)); if (azOut < 0) azOut += 360;
-
-      let defl = azOut - azIn;
-      while (defl > 180) defl -= 360;
-      while (defl < -180) defl += 360;
-
-      const delta = Math.abs(defl);
-      const sentido = defl > 0 ? 'D' : 'I';
-      const radDelta = toRad(delta);
-      const R = pi.r || 1;
-
-      const T = R * Math.tan(radDelta / 2);
-      const L = (Math.PI * R * delta) / 180;
-
-      // Distancia entretangente
-      const distAlPI = Math.hypot(pi.n - pPrev.n, pi.e - pPrev.e);
-      const kPC = kActual + (distAlPI - T);
-      const kPT = kPC + L;
-
-      // Coordenadas PC, Centro y PT
-      const azContraIn = (azIn + 180) % 360;
-      const nPC = pi.n + T * Math.cos(toRad(azContraIn));
-      const ePC = pi.e + T * Math.sin(toRad(azContraIn));
-
-      const signo = sentido === 'D' ? 1 : -1;
-      const azCentro = (azIn + (signo * 90) + 360) % 360;
-      const nCentro = nPC + R * Math.cos(toRad(azCentro));
-      const eCentro = ePC + R * Math.sin(toRad(azCentro));
-
-      const nPT = pi.n + T * Math.cos(toRad(azOut));
-      const ePT = pi.e + T * Math.sin(toRad(azOut));
-
-      alineamiento.push({ idCurva: i, kPC, kPT, R, nPC, ePC, nPT, ePT, nCentro, eCentro, signo, azIn, azOut, delta, T, L });
-
-      curvasRes.innerHTML += `
-        <div style="background:#0c120b; padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid var(--border);">
-          <strong>Curva PI ${i} (${sentido}):</strong> R=${R}m | Δ=${delta.toFixed(2)}° | T=${T.toFixed(2)}m | L=${L.toFixed(2)}m<br>
-          <span style="color:var(--accent);">PC: K${(kPC/1000).toFixed(3)} | PT: K${(kPT/1000).toFixed(3)}</span>
-        </div>
-      `;
-
-      carteraPuntos.push({ id: carteraPuntos.length + 1, k: kPC, n: nPC, e: ePC, tipo: `PC_${i}` });
-      carteraPuntos.push({ id: carteraPuntos.length + 1, k: kPT, n: nPT, e: ePT, tipo: `PT_${i}` });
-
-      kActual = kPT;
-    }
-
-    renderCartera();
-    calcularReplanteo();
-    calcularInverso();
-  }
-
-  function renderCartera() {
-    const tbody = document.getElementById('tablaCartera');
-    tbody.innerHTML = '';
-    carteraPuntos.forEach(p => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.id}</td>
-        <td>K${(p.k).toFixed(2)}</td>
-        <td>${p.n.toFixed(3)}</td>
-        <td>${p.e.toFixed(3)}</td>
-        <td>${p.tipo}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // REPLANTEO
-  function calcularReplanteo() {
-    const nEst = parseFloat(document.getElementById('nEst').value);
-    const eEst = parseFloat(document.getElementById('eEst').value);
-    const kRep = parseFloat(document.getElementById('kRep').value);
-    const off = parseFloat(document.getElementById('offRep').value) || 0;
-    const dhLeida = parseFloat(document.getElementById('dhLeida').value);
-    const boxStatus = document.getElementById('boxStakeStatus');
-
-    if (isNaN(nEst) || isNaN(eEst) || isNaN(kRep) || alineamiento.length === 0) {
-      document.getElementById('repAz').textContent = '--';
-      document.getElementById('repDH').textContent = '--';
-      boxStatus.style.display = 'none';
-      return;
-    }
-
-    // Buscar punto en curva o tangente
-    let nPto = null, ePto = null;
-    for (let c of alineamiento) {
-      if (kRep >= c.kPC && kRep <= c.kPT) {
-        const s = kRep - c.kPC;
-        const theta = toDeg(s / c.R);
-        const azRad = (c.azIn + (c.signo * 90) + 180 + (c.signo * theta) + 360) % 360;
-        nPto = c.nCentro + c.R * Math.cos(toRad(azRad));
-        ePto = c.eCentro + c.R * Math.sin(toRad(azRad));
-        break;
-      }
-    }
-
-    if (nPto === null) {
-      // Tomar primer PC como referencia si está fuera de curva
-      nPto = alineamiento[0].nPC;
-      ePto = alineamiento[0].ePC;
-    }
-
-    const dn = nPto - nEst;
-    const de = ePto - eEst;
-    const dhTeorica = Math.hypot(dn, de);
-    let az = toDeg(Math.atan2(de, dn));
-    if (az < 0) az += 360;
-
-    const g = Math.floor(az);
-    const m = Math.floor((az - g) * 60);
-    const s = Math.round(((az - g) * 60 - m) * 60);
-
-    document.getElementById('repAz').textContent = `${g}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`;
-    document.getElementById('repDH').textContent = `${dhTeorica.toFixed(3)} m`;
-
-    if (!isNaN(dhLeida)) {
-      const diff = dhLeida - dhTeorica;
-      boxStatus.style.display = 'block';
-      if (Math.abs(diff) <= 0.003) {
-        boxStatus.className = 'stake-box box-match';
-        boxStatus.textContent = `🎯 ¡EN CLAVO! (Δ = ${(diff * 1000).toFixed(0)} mm)`;
-      } else if (diff < 0) {
-        boxStatus.className = 'stake-box box-away';
-        boxStatus.textContent = `⬅ ALEJAR: ${Math.abs(diff).toFixed(3)} m`;
-      } else {
-        boxStatus.className = 'stake-box box-approach';
-        boxStatus.textContent = `➡ ACERCAR: ${Math.abs(diff).toFixed(3)} m`;
-      }
-    } else {
-      boxStatus.style.display = 'none';
-    }
-  }
-
-  // INVERSO: COORDENADA -> ABS / ORD
-  function calcularInverso() {
-    const n = parseFloat(document.getElementById('nInv').value);
-    const e = parseFloat(document.getElementById('eInv').value);
-    const resBox = document.getElementById('resInverso');
-    if (isNaN(n) || isNaN(e) || alineamiento.length === 0) {
-      resBox.style.display = 'none';
-      return;
-    }
-
-    resBox.style.display = 'block';
-    let mejorDist = 9999999;
-    let absFinal = 0;
-    let offsetFinal = 0;
-    let enRango = false;
-
-    alineamiento.forEach(c => {
-      const dn = n - c.nCentro;
-      const de = e - c.eCentro;
-      const distCentro = Math.hypot(dn, de);
-
-      let azPto = toDeg(Math.atan2(de, dn)); if (azPto < 0) azPto += 360;
-      let azPC = toDeg(Math.atan2(c.ePC - c.eCentro, c.nPC - c.nCentro)); if (azPC < 0) azPC += 360;
-
-      let diffAng = (c.signo === 1) ? (azPto - azPC) : (azPC - azPto);
-      diffAng = (diffAng + 360) % 360;
-
-      const s = toRad(diffAng) * c.R;
-      const k = c.kPC + s;
-      const off = (c.signo === 1) ? (distCentro - c.R) : (c.R - distCentro);
-
-      if (Math.abs(off) < Math.abs(mejorDist)) {
-        mejorDist = off;
-        absFinal = k;
-        offsetFinal = off;
-        enRango = (k >= c.kPC && k <= c.kPT);
-      }
-    });
-
-    document.getElementById('lblInvK').textContent = `K${absFinal.toFixed(2)}`;
-    document.getElementById('lblInvOff').textContent = `${offsetFinal >= 0 ? '+' : ''}${offsetFinal.toFixed(3)} m (${offsetFinal >= 0 ? 'Der' : 'Izq'})`;
-
-    const rangeTag = document.getElementById('lblInvRange');
-    if (enRango) {
-      rangeTag.textContent = '✓ DENTRO DEL RANGO DE CURVA';
-      rangeTag.style.background = 'rgba(22, 163, 74, 0.2)';
-      rangeTag.style.color = '#4ade80';
-    } else {
-      rangeTag.textContent = '✕ FUERA DEL RANGO DE PC Y PT';
-      rangeTag.style.background = 'rgba(220, 38, 38, 0.2)';
-      rangeTag.style.color = '#f87171';
-    }
-  }
-
-  function cambiarTab(idx) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === idx));
-    for (let i = 1; i <= 4; i++) {
-      document.getElementById('tab' + i).style.display = (i === idx) ? 'block' : 'none';
-    }
-  }
-
-  function exportarCSV() {
-    if (!carteraPuntos.length) return;
-    let csv = "Punto,Norte,Este,Cota,Codigo\n";
-    carteraPuntos.forEach(p => {
-      csv += `${p.id},${p.n.toFixed(4)},${p.e.toFixed(4)},0.000,${p.tipo}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `TopoVias_${Date.now()}.csv`;
-    link.click();
-  }
-
-  // SERVICE WORKER & ACTUALIZACIÓN INSTANTÁNEA
-  let newWorker;
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
-        reg.update();
-        reg.addEventListener('updatefound', () => {
-          newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              document.getElementById('updateBanner').style.display = 'flex';
-            }
-          });
-        });
-      });
-    });
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
-  }
-
-  function forzarActualizacion() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg) {
-          reg.update().then(() => {
-            alert('Buscando última versión en el servidor...');
-          });
-        } else {
-          window.location.reload(true);
+  e.respondWith(
+    fetch(e.request, { cache: 'no-store' })
+      .then((netRes) => {
+        if (netRes && netRes.status === 200) {
+          const clone = netRes.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
         }
-      });
-    } else {
-      window.location.reload(true);
-    }
-  }
+        return netRes;
+      })
+      .catch(() => caches.match(e.request))
+  );
+});
 
-  function aplicarActualizacion() {
-    if (newWorker) {
-      newWorker.postMessage({ action: 'skipWaiting' });
-    } else {
-      window.location.reload(true);
-    }
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.action === 'skipWaiting') {
+    self.skipWaiting();
   }
-
-  // Inicio
-  renderProyectos();
-</script>
-</body>
-</html>
+});
