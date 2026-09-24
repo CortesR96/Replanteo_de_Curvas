@@ -1,5 +1,5 @@
 // INCREMENTA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB
-const CACHE_NAME = 'topovias-cr-v2.0.0';
+const CACHE_NAME = 'topovias-cr-v2.0.2';
 
 const ASSETS = [
   './',
@@ -27,9 +27,10 @@ self.addEventListener('activate', (e) => {
   return self.clients.claim();
 });
 
-// Network-First: Primero consulta a GitHub sin usar la memoria intermedia
+// Network-First: Pide siempre a GitHub primero sin guardar caché agresivo
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  if (!e.request.url.startsWith('http')) return;
 
   e.respondWith(
     fetch(e.request, { cache: 'no-store' })
