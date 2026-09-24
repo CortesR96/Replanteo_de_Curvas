@@ -1,18 +1,16 @@
 {
-"name": "TopoCurvas CR",
-"short_name": "TopoCurvas CR",
-"description": "Alineamiento y replanteo de proyectos viales con cálculo continuo de PIs",
-"start_url": "./index.html",
-"display": "standalone",
-"background_color": "#141a13",
-"theme_color": "#141a13",
-"orientation": "portrait-primary",
-"icons": [
-{
-"src": "https://cdn-icons-png.flaticon.com/512/3233/3233497.png",
-"sizes": "512x512",
-"type": "image/png",
-"purpose": "any maskable"
-}
-]
+  "name": "TOPO VIAS CR",
+  "short_name": "TOPO VIAS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#111710",
+  "theme_color": "#1a2218",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233497.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
