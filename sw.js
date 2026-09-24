@@ -1,29 +1,25 @@
-// Cambiar el valor de CACHE_NAME en cada despliegue para purgar caché anterior
-const CACHE_NAME = 'topocurvas-cr-v1.0.3';
-const ASSETS_TO_CACHE = [
+// INCREMENTA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB
+const CACHE_NAME = 'topovias-cr-v2.0.0';
+
+const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com'
+  './manifest.json'
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', (e) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+        keys.map((k) => {
+          if (k !== CACHE_NAME) return caches.delete(k);
         })
       );
     })
@@ -31,28 +27,25 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+// Network-First: Primero consulta a GitHub sin usar la memoria intermedia
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+  e.respondWith(
+    fetch(e.request, { cache: 'no-store' })
+      .then((netRes) => {
+        if (netRes && netRes.status === 200) {
+          const clone = netRes.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
         }
-        return networkResponse;
+        return netRes;
       })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+      .catch(() => caches.match(e.request))
   );
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'skipWaiting') {
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.action === 'skipWaiting') {
     self.skipWaiting();
   }
 });
