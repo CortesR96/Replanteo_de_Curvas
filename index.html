@@ -2,421 +2,1502 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0284c7" />
-  <title>TopoCurvas PWA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#182016" />
+  <title>TopoCurvas CR - Proyectos Viales</title>
   <link rel="manifest" href="manifest.json" />
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --border: #334155;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              900: '#141a13', // Fondo general militar oscuro mate
+              800: '#1c241a', // Tarjetas principales
+              750: '#232d20', // Tarjetas secundarias e inputs
+              700: '#2d3a2a', // Bordes
+              600: '#41523c', // Bordes activos / acentos secundarios
+              accent: '#84a958', // Verde oliva táctico nítido
+              accentHover: '#95bc66',
+              gold: '#eab308', // Resaltes métricos y alertas
+              text: '#f4f6f3',
+              muted: '#9ba895',
+            }
+          }
+        }
+      }
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 60px; }
-    .container { max-width: 600px; margin: 0 auto; }
-    
-    header { text-align: center; margin-bottom: 12px; }
-    h1 { font-size: 1.25rem; color: #38bdf8; }
-    .sub { font-size: 0.75rem; color: var(--muted); }
-
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-    .card-title { font-size: 0.85rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .full { grid-column: span 2; }
-
-    label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
-    input, select { width: 100%; padding: 8px; background: #0b1120; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.9rem; outline: none; }
-    input:focus, select:focus { border-color: var(--accent); }
-
-    /* Resultados geométricos */
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .kpi { background: #0b1120; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
-    .kpi-label { font-size: 0.65rem; color: var(--muted); display: block; }
-    .kpi-val { font-size: 0.9rem; font-weight: bold; color: #38bdf8; }
-
-    /* Botones */
-    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; display: block; }
-    .btn-exp { background: var(--success); color: #fff; margin-top: 8px; }
-    .btn-sec { background: var(--border); color: var(--text); margin-top: 6px; font-size: 0.75rem; padding: 6px; }
-
-    /* Módulo Inverso */
-    .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-top: 8px; display: inline-block; }
-    .status-in { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
-    .status-out { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #b91c1c; }
-
-    /* Tablas */
-    .table-container { overflow-x: auto; max-height: 250px; margin-top: 10px; border: 1px solid var(--border); border-radius: 6px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: right; }
-    th, td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
-    th { background: #141e33; color: var(--muted); position: sticky; top: 0; }
-    th:first-child, td:first-child { text-align: left; }
-    .tag { font-size: 0.65rem; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
-    .tag-pc { background: #0284c7; }
-    .tag-pt { background: #9333ea; }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #141a13; }
+    ::-webkit-scrollbar-thumb { background: #2d3a2a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #41523c; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
   </style>
 </head>
-<body>
+<body class="bg-tactical-900 text-tactical-text min-h-screen antialiased selection:bg-tactical-accent selection:text-tactical-900">
 
-<div class="container">
-  <header>
-    <h1>Replanteo de Curvas Circulares</h1>
-    <div class="sub">Cálculo en tiempo real • Offline • PWA</div>
+  <!-- Top App Bar -->
+  <header class="bg-tactical-800 border-b border-tactical-700 sticky top-0 z-40 px-4 py-3 shadow-md">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <button id="btnBackToProjects" class="hidden px-2.5 py-1.5 rounded-md bg-tactical-750 border border-tactical-700 text-tactical-accent hover:border-tactical-accent text-xs font-semibold uppercase tracking-wider transition-colors">
+          &larr; Proyectos
+        </button>
+        <div>
+          <h1 class="text-base font-black tracking-wide text-tactical-text flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-tactical-accent"></span>
+            TOPOCURVAS <span class="text-tactical-accent">CR</span>
+          </h1>
+          <p id="headerSubtitle" class="text-xs text-tactical-muted font-medium">Gestión de Trazados y Curvas Viales</p>
+        </div>
+      </div>
+      <div id="projectStatusBadge" class="hidden text-xs px-2.5 py-1 rounded bg-tactical-750 border border-tactical-700 mono font-semibold text-tactical-gold">
+        Modo Trabajo
+      </div>
+    </div>
   </header>
 
-  <!-- 1. PARÁMETROS GEOMÉTRICOS -->
-  <div class="card">
-    <div class="card-title">1. Parámetros de Diseño</div>
-    <div class="grid">
-      <div>
-        <label>Norte PI (m)</label>
-        <input type="number" id="nPI" step="0.001" />
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto p-3 sm:p-4">
+
+    <!-- ==================== VISTA 1: LISTADO DE PROYECTOS ==================== -->
+    <section id="viewProjects" class="space-y-4">
+      <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-tactical-text uppercase tracking-wider">Proyectos de Vía</h2>
+          <p class="text-xs text-tactical-muted mt-1">Selecciona una vía de trabajo o crea una nueva con su alineamiento de PIs.</p>
+        </div>
+        <button id="btnOpenNewProjectModal" class="px-4 py-2.5 rounded-lg bg-tactical-accent text-tactical-900 hover:bg-tactical-accentHover font-bold text-sm tracking-wide uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+          <span>+</span> Crear Nuevo Proyecto
+        </button>
       </div>
-      <div>
-        <label>Este PI (m)</label>
-        <input type="number" id="ePI" step="0.001" />
+
+      <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Tarjetas dinámicas de proyectos -->
       </div>
-      <div>
-        <label>Azimut Entrada (°)</label>
-        <input type="number" id="azIn" step="0.0001" placeholder="Ej: 45.2530" />
+    </section>
+
+    <!-- ==================== VISTA 2: DENTRO DEL PROYECTO ==================== -->
+    <section id="viewWorkbench" class="hidden space-y-4">
+      
+      <!-- Navegación por pestañas -->
+      <nav class="flex overflow-x-auto space-x-2 border-b border-tactical-700 pb-2 no-scrollbar">
+        <button class="tab-btn active-tab px-3.5 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all whitespace-nowrap bg-tactical-accent text-tactical-900" data-tab="tab-geometry">
+          1. Geometría y PIs
+        </button>
+        <button class="tab-btn px-3.5 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all whitespace-nowrap bg-tactical-800 text-tactical-muted border border-tactical-700 hover:text-tactical-text hover:border-tactical-600" data-tab="tab-stakeout">
+          2. Replanteo
+        </button>
+        <button class="tab-btn px-3.5 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all whitespace-nowrap bg-tactical-800 text-tactical-muted border border-tactical-700 hover:text-tactical-text hover:border-tactical-600" data-tab="tab-absord">
+          3. Abs y Ord
+        </button>
+        <button class="tab-btn px-3.5 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all whitespace-nowrap bg-tactical-800 text-tactical-muted border border-tactical-700 hover:text-tactical-text hover:border-tactical-600" data-tab="tab-roster">
+          4. Cartera Total
+        </button>
+      </nav>
+
+      <!-- TAB 1: GEOMETRÍA Y PIs -->
+      <div id="tab-geometry" class="tab-content space-y-4">
+        <!-- Parámetros base del proyecto -->
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-tactical-700">
+            <div>
+              <span class="text-xs uppercase font-bold text-tactical-accent tracking-wider">Alineamiento Principal</span>
+              <h3 id="currentProjectTitle" class="text-base font-bold text-tactical-text">--</h3>
+            </div>
+            <div class="flex items-center gap-3">
+              <div>
+                <label class="block text-[10px] text-tactical-muted font-bold uppercase">Abscisa Inicio K0 (m)</label>
+                <input type="number" id="inputK0" step="0.01" class="w-32 bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1 text-xs mono text-tactical-gold focus:outline-none focus:border-tactical-accent" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-tactical-muted font-bold uppercase">Intervalo Estacas (m)</label>
+                <input type="number" id="inputInterval" step="1" min="1" class="w-24 bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Resumen de alineamiento -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3">
+            <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+              <span class="block text-[10px] font-bold uppercase text-tactical-muted">Longitud Vía Total</span>
+              <span id="kpiTotalLength" class="text-sm font-bold text-tactical-text mono">0.00 m</span>
+            </div>
+            <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+              <span class="block text-[10px] font-bold uppercase text-tactical-muted">Abscisa Final</span>
+              <span id="kpiFinalStation" class="text-sm font-bold text-tactical-gold mono">K0+000.00</span>
+            </div>
+            <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+              <span class="block text-[10px] font-bold uppercase text-tactical-muted">Total Vértices PI</span>
+              <span id="kpiTotalPIs" class="text-sm font-bold text-tactical-text mono">0</span>
+            </div>
+            <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+              <span class="block text-[10px] font-bold uppercase text-tactical-muted">Curvas Diseñadas</span>
+              <span id="kpiTotalCurves" class="text-sm font-bold text-tactical-accent mono">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerta de solape / error -->
+        <div id="overlapAlertBox" class="hidden p-3 rounded-lg bg-red-950/60 border border-red-700/80 text-red-200 text-xs">
+          <div class="font-bold flex items-center gap-1.5 mb-1">
+            <span>&#9888;</span> ADVERTENCIA GEOMÉTRICA DE SOLAPAMIENTO:
+          </div>
+          <ul id="overlapAlertList" class="list-disc list-inside space-y-0.5"></ul>
+        </div>
+
+        <!-- Lista de Vértices PIs -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-tactical-muted">Vértices del Eje (PIs y Curvas)</h4>
+            <button id="btnAddPI" class="px-3 py-1.5 rounded-lg bg-tactical-accent/20 border border-tactical-accent text-tactical-accent hover:bg-tactical-accent hover:text-tactical-900 text-xs font-bold transition-all flex items-center gap-1">
+              <span>+</span> Agregar PI
+            </button>
+          </div>
+
+          <div id="piCardsContainer" class="space-y-3">
+            <!-- Render dinámico de tarjetas de PI -->
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Deflexión Δ (°)</label>
-        <input type="number" id="delta" step="0.0001" placeholder="Ej: 62.5000" />
+
+      <!-- TAB 2: REPLANTEO -->
+      <div id="tab-stakeout" class="tab-content hidden space-y-4">
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs uppercase font-bold text-tactical-accent tracking-wider mb-3">1. Estación de Armado (Instrumento)</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-3 flex flex-wrap items-center gap-2">
+              <span class="text-xs text-tactical-muted font-bold">Cargar Hito Notable:</span>
+              <div id="quickStationButtons" class="flex flex-wrap gap-1.5">
+                <!-- Botones rápidos dinámicos -->
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Norte Estación (m)</label>
+              <input type="number" id="stnNorth" step="0.001" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Este Estación (m)</label>
+              <input type="number" id="stnEast" step="0.001" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Identificador Estación</label>
+              <input type="text" id="stnName" placeholder="Ej: EST-1 / PI-1" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-gold focus:outline-none focus:border-tactical-accent" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Parámetros del punto a replantear -->
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs uppercase font-bold text-tactical-accent tracking-wider mb-3">2. Punto Deseado en el Eje o Talud</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Abscisa a Replantear (m)</label>
+              <input type="number" id="stkStation" step="0.001" placeholder="Ej: 125.00" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-gold focus:outline-none focus:border-tactical-accent" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Desplazamiento / Offset (m)</label>
+              <input type="number" id="stkOffset" step="0.001" value="0.000" placeholder="+ Der / - Izq" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+              <span class="text-[10px] text-tactical-muted mt-0.5 block">0 = Eje Central, (+) Derecha, (-) Izquierda</span>
+            </div>
+          </div>
+
+          <!-- Resultados Teóricos de Replanteo -->
+          <div class="mt-4 pt-3 border-t border-tactical-700/80">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">Norte Teórico</span>
+                <span id="stkResNorth" class="text-xs font-bold text-tactical-text mono">0.000 m</span>
+              </div>
+              <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">Este Teórico</span>
+                <span id="stkResEast" class="text-xs font-bold text-tactical-text mono">0.000 m</span>
+              </div>
+              <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">Azimut Replanteo</span>
+                <span id="stkResAzimuth" class="text-xs font-bold text-tactical-accent mono">00°00'00"</span>
+              </div>
+              <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">DH Teórica</span>
+                <span id="stkResHD" class="text-xs font-bold text-tactical-gold mono">0.000 m</span>
+              </div>
+            </div>
+            
+            <div id="stkSegmentTag" class="mt-2 text-[11px] text-tactical-muted font-medium mono">
+              Tramo: --
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo de Diferencia en Campo: DH Leída -->
+        <div class="bg-tactical-800 border-2 border-tactical-600 rounded-xl p-4 shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs uppercase font-bold text-tactical-gold tracking-wider">3. Ajuste de Distancia en Campo (Estación Total)</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-tactical-750 border border-tactical-700 text-tactical-muted font-mono">Tolerancia ±3mm</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase mb-1">Distancia Horizontal (DH) Leída con Prisma (m)</label>
+              <input type="number" id="stkMeasuredHD" step="0.001" placeholder="Ej: 45.328" class="w-full bg-tactical-900 border border-tactical-600 rounded-lg px-3 py-2 text-base mono text-tactical-gold font-bold focus:outline-none focus:border-tactical-accent" />
+            </div>
+
+            <div id="stakeoutFeedbackBadge" class="p-3 rounded-lg bg-tactical-750 border border-tactical-700 text-center">
+              <span class="block text-[10px] uppercase font-bold text-tactical-muted">Instrucción para el Cadenero</span>
+              <span id="stkDiffDeltaText" class="text-sm sm:text-base font-extrabold mono block mt-0.5 text-tactical-text">
+                INGRESE DH LEÍDA
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Sentido Curva</label>
-        <select id="sentido">
-          <option value="D">Derecha (D)</option>
-          <option value="I">Izquierda (I)</option>
-        </select>
+
+      <!-- TAB 3: ABS Y ORD (MÓDULO INVERSO) -->
+      <div id="tab-absord" class="tab-content hidden space-y-4">
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs uppercase font-bold text-tactical-accent tracking-wider mb-2">Proyección Inversa de Coordenadas</h3>
+          <p class="text-xs text-tactical-muted mb-4">Ingresa las coordenadas levantadas por la estación total o GNSS para calcular al instante su Abscisa ($K$) y el desplazamiento perpendicular ($Offset$) respecto al eje de la vía.</p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Norte Prisma (m)</label>
+              <input type="number" id="invNorth" step="0.001" placeholder="Ej: 10045.210" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Este Prisma (m)</label>
+              <input type="number" id="invEast" step="0.001" placeholder="Ej: 5012.350" class="w-full bg-tactical-750 border border-tactical-700 rounded px-2.5 py-1.5 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+            </div>
+          </div>
+
+          <!-- Cuadro de Resultados Inversos -->
+          <div class="mt-4 pt-3 border-t border-tactical-700/80">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="bg-tactical-750 border border-tactical-700 p-3 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">Abscisa Proyectada ($K$)</span>
+                <span id="invResStation" class="text-base font-extrabold text-tactical-gold mono">K0+000.00</span>
+                <span id="invResChainageRaw" class="text-[10px] text-tactical-muted mono block mt-0.5">--</span>
+              </div>
+              <div class="bg-tactical-750 border border-tactical-700 p-3 rounded-lg">
+                <span class="block text-[10px] font-bold uppercase text-tactical-muted">Desplazamiento Perpendicular</span>
+                <span id="invResOffset" class="text-base font-extrabold text-tactical-text mono">0.000 m</span>
+                <span id="invResSide" class="text-[10px] text-tactical-muted block mt-0.5">En Eje Central</span>
+              </div>
+            </div>
+
+            <!-- Estado de Rango (Dentro / Fuera de Vía) -->
+            <div id="invStatusBadge" class="mt-3 p-2.5 rounded-lg border text-xs font-bold text-center mono">
+              Esperando coordenadas...
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Radio R (m)</label>
-        <input type="number" id="radio" step="0.01" />
+
+      <!-- TAB 4: CARTERA TOTAL Y EXPORTACIÓN -->
+      <div id="tab-roster" class="tab-content hidden space-y-4">
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            <h3 class="text-xs uppercase font-bold text-tactical-accent tracking-wider">Cartera de Replanteo para Estación</h3>
+            <p class="text-xs text-tactical-muted">Lista completa de puntos notables (PC, PT, estacas regulares cada intervalo configurado y fin de vía).</p>
+          </div>
+          <button id="btnExportCSV" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-tactical-accent hover:bg-tactical-accentHover text-tactical-900 font-bold text-xs uppercase tracking-wide transition-all flex items-center justify-center gap-2">
+            <span>&#128190;</span> Exportar CSV Estación (P,N,E,Z,Code)
+          </button>
+        </div>
+
+        <div class="bg-tactical-800 border border-tactical-700 rounded-xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto max-h-[480px]">
+            <table class="w-full text-right text-xs mono">
+              <thead>
+                <tr class="bg-tactical-750 text-tactical-muted uppercase text-[10px] border-b border-tactical-700 sticky top-0 z-10">
+                  <th class="p-2.5 text-left">Pto</th>
+                  <th class="p-2.5 text-left">Abscisa</th>
+                  <th class="p-2.5">Norte (m)</th>
+                  <th class="p-2.5">Este (m)</th>
+                  <th class="p-2.5">Tipo / Código</th>
+                  <th class="p-2.5">Deflexión</th>
+                </tr>
+              </thead>
+              <tbody id="rosterTableBody" class="divide-y divide-tactical-700/60">
+                <!-- Puntos dinámicos -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Abscisa PI (m)</label>
-        <input type="number" id="kPI" step="0.01" placeholder="Ej: 1250.00" />
+
+    </section>
+  </main>
+
+  <!-- ==================== MODAL: CREAR NUEVO PROYECTO ==================== -->
+  <div id="modalNewProject" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-tactical-800 border border-tactical-600 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-tactical-700 pb-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-tactical-accent">Nuevo Proyecto Vial</h3>
+        <button id="btnCloseModal" class="text-tactical-muted hover:text-tactical-text text-lg">&times;</button>
       </div>
-      <div>
-        <label>Intervalo Estacas (m)</label>
-        <input type="number" id="intervalo" step="1" />
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-tactical-muted font-bold uppercase mb-1">Nombre de la Vía</label>
+          <input type="text" id="newProjName" placeholder="Ej: Vía Tolima Sector 2" class="w-full bg-tactical-750 border border-tactical-700 rounded-lg px-3 py-2 text-xs text-tactical-text focus:outline-none focus:border-tactical-accent" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-tactical-muted font-bold uppercase mb-1">Abscisa Inicial K0 (m)</label>
+            <input type="number" id="newProjK0" value="0.00" step="0.01" class="w-full bg-tactical-750 border border-tactical-700 rounded-lg px-3 py-2 text-xs mono text-tactical-gold focus:outline-none focus:border-tactical-accent" />
+          </div>
+          <div>
+            <label class="block text-xs text-tactical-muted font-bold uppercase mb-1">Intervalo (m)</label>
+            <input type="number" id="newProjInterval" value="10" step="1" min="1" class="w-full bg-tactical-750 border border-tactical-700 rounded-lg px-3 py-2 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-1 border-t border-tactical-700/60">
+          <div>
+            <label class="block text-xs text-tactical-muted font-bold uppercase mb-1">Norte PI 0 (Inicio)</label>
+            <input type="number" id="newProjN0" value="1000.000" step="0.001" class="w-full bg-tactical-750 border border-tactical-700 rounded-lg px-3 py-2 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+          </div>
+          <div>
+            <label class="block text-xs text-tactical-muted font-bold uppercase mb-1">Este PI 0 (Inicio)</label>
+            <input type="number" id="newProjE0" value="1000.000" step="0.001" class="w-full bg-tactical-750 border border-tactical-700 rounded-lg px-3 py-2 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btnCancelModal" class="px-3 py-1.5 rounded-lg border border-tactical-700 text-tactical-muted hover:text-tactical-text text-xs uppercase font-semibold">Cancelar</button>
+        <button id="btnSaveProject" class="px-4 py-1.5 rounded-lg bg-tactical-accent text-tactical-900 hover:bg-tactical-accentHover text-xs uppercase font-bold">Guardar Proyecto</button>
       </div>
     </div>
   </div>
 
-  <!-- 2. ELEMENTOS CALCULADOS -->
-  <div class="card">
-    <div class="card-title">2. Geometría de la Curva</div>
-    <div class="kpi-grid">
-      <div class="kpi"><span class="kpi-label">Subtangente (T)</span><span class="kpi-val" id="lblT">0.000 m</span></div>
-      <div class="kpi"><span class="kpi-label">Longitud (L)</span><span class="kpi-val" id="lblL">0.000 m</span></div>
-      <div class="kpi"><span class="kpi-label">Cuerda Larga (CL)</span><span class="kpi-val" id="lblCL">0.000 m</span></div>
-      <div class="kpi"><span class="kpi-label">Externa (E)</span><span class="kpi-val" id="lblE">0.000 m</span></div>
-      <div class="kpi"><span class="kpi-label">Abscisa PC</span><span class="kpi-val" id="lblPC">K0+000.00</span></div>
-      <div class="kpi"><span class="kpi-label">Abscisa PT</span><span class="kpi-val" id="lblPT">K0+000.00</span></div>
-    </div>
-  </div>
+  <script>
+    /* ==========================================================================
+       TOPOCURVAS CR - MOTOR MATEMÁTICO Y CONTROLADOR VIAL
+       ========================================================================== */
 
-  <!-- 3. MÓDULO INVERSO: COORDENADA -> ABSCISA Y DESPLAZAMIENTO -->
-  <div class="card">
-    <div class="card-title">3. Abscisa y Desplazamiento desde Punto</div>
-    <div class="grid">
-      <div>
-        <label>Norte Punto (m)</label>
-        <input type="number" id="nPtoInv" step="0.001" placeholder="Ej: 1045.20" />
-      </div>
-      <div>
-        <label>Este Punto (m)</label>
-        <input type="number" id="ePtoInv" step="0.001" placeholder="Ej: 980.50" />
-      </div>
-    </div>
-    
-    <div id="invResult" style="margin-top: 8px; display: none;">
-      <div class="kpi-grid">
-        <div class="kpi"><span class="kpi-label">Abscisa Proyectada</span><span class="kpi-val" id="lblInvK">--</span></div>
-        <div class="kpi"><span class="kpi-label">Desplazamiento / Ord.</span><span class="kpi-val" id="lblInvOffset">--</span></div>
-      </div>
-      <div id="lblInvStatus" class="status-badge"></div>
-    </div>
-  </div>
+    const STORAGE_KEY = 'topocurvas_cr_projects_v1';
+    const ACTIVE_PROJECT_KEY = 'topocurvas_cr_active_id';
 
-  <!-- 4. CARTERA DE PUNTOS Y EXPORTACIÓN -->
-  <div class="card">
-    <div class="card-title">
-      <span>4. Cartera de Replanteo</span>
-      <span style="font-size: 0.7rem; color: var(--muted);" id="lblTotalPtos">0 ptos</span>
-    </div>
-    <button class="btn btn-exp" onclick="exportarCSV()">Exportar CSV (Pto, Norte, Este, Z, Código)</button>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Pto</th>
-            <th>Abscisa</th>
-            <th>Norte</th>
-            <th>Este</th>
-            <th>Deflexión</th>
-          </tr>
-        </thead>
-        <tbody id="tablaBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Constantes y Estado
-  const toRad = deg => (deg * Math.PI) / 180;
-  const toDeg = rad => (rad * 180) / Math.PI;
-
-  const defaults = {
-    nPI: 1000.000,
-    ePI: 1000.000,
-    azIn: 45.0000,
-    delta: 50.0000,
-    sentido: 'D',
-    radio: 80.00,
-    kPI: 150.00,
-    intervalo: 10
-  };
-
-  let geo = {};
-  let puntosLista = [];
-
-  // 1. Cargar y Guardar en LocalStorage
-  function cargarDatos() {
-    const guardado = localStorage.getItem('topocurvas_data');
-    const data = guardado ? JSON.parse(guardado) : defaults;
-
-    document.getElementById('nPI').value = data.nPI;
-    document.getElementById('ePI').value = data.ePI;
-    document.getElementById('azIn').value = data.azIn;
-    document.getElementById('delta').value = data.delta;
-    document.getElementById('sentido').value = data.sentido;
-    document.getElementById('radio').value = data.radio;
-    document.getElementById('kPI').value = data.kPI;
-    document.getElementById('intervalo').value = data.intervalo;
-
-    const inv = JSON.parse(localStorage.getItem('topocurvas_inv') || '{}');
-    if (inv.n) document.getElementById('nPtoInv').value = inv.n;
-    if (inv.e) document.getElementById('ePtoInv').value = inv.e;
-  }
-
-  function guardarDatos() {
-    const data = {
-      nPI: parseFloat(document.getElementById('nPI').value) || 0,
-      ePI: parseFloat(document.getElementById('ePI').value) || 0,
-      azIn: parseFloat(document.getElementById('azIn').value) || 0,
-      delta: parseFloat(document.getElementById('delta').value) || 0,
-      sentido: document.getElementById('sentido').value,
-      radio: parseFloat(document.getElementById('radio').value) || 1,
-      kPI: parseFloat(document.getElementById('kPI').value) || 0,
-      intervalo: parseFloat(document.getElementById('intervalo').value) || 10
+    // Estado en Memoria
+    let projects = [];
+    let currentProject = null;
+    let alignmentData = {
+      elements: [], // Secuencia de rectas y curvas calculadas
+      curveElements: [], // Datos de cada curva con PC, PT, Centro, Radio, Delta, etc.
+      rosterPoints: [], // Cartera total de replanteo
+      overlaps: [], // Advertencias de solape
+      totalLength: 0,
+      endStation: 0
     };
-    localStorage.setItem('topocurvas_data', JSON.stringify(data));
-    return data;
-  }
 
-  // 2. Motor de cálculo de curva
-  function calcular() {
-    const d = guardarDatos();
-    if (d.radio <= 0 || d.delta <= 0) return;
+    // Funciones matemáticas y angulares
+    const toRad = deg => (deg * Math.PI) / 180;
+    const toDeg = rad => (rad * 180) / Math.PI;
 
-    const radDelta = toRad(d.delta);
-    const T = d.radio * Math.tan(radDelta / 2);
-    const L = (Math.PI * d.radio * d.delta) / 180;
-    const CL = 2 * d.radio * Math.sin(radDelta / 2);
-    const E = d.radio * ((1 / Math.cos(radDelta / 2)) - 1);
-
-    const kPC = d.kPI - T;
-    const kPT = kPC + L;
-
-    // Coordenadas PC
-    const azContraIn = (d.azIn + 180) % 360;
-    const nPC = d.nPI + T * Math.cos(toRad(azContraIn));
-    const ePC = d.ePI + T * Math.sin(toRad(azContraIn));
-
-    // Centro de Curvatura
-    const signo = (d.sentido === 'D') ? 1 : -1;
-    const azCentro = (d.azIn + (signo * 90) + 360) % 360;
-    const nCentro = nPC + d.radio * Math.cos(toRad(azCentro));
-    const eCentro = ePC + d.radio * Math.sin(toRad(azCentro));
-
-    // PT
-    const azOut = (d.azIn + (signo * d.delta) + 360) % 360;
-    const nPT = d.nPI + T * Math.cos(toRad(azOut));
-    const ePT = d.ePI + T * Math.sin(toRad(azOut));
-
-    // Guardar variables globales para el módulo inverso
-    geo = { T, L, CL, E, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, R: d.radio, signo, azIn: d.azIn, delta: d.delta };
-
-    // Actualizar KPIs
-    document.getElementById('lblT').textContent = `${T.toFixed(3)} m`;
-    document.getElementById('lblL').textContent = `${L.toFixed(3)} m`;
-    document.getElementById('lblCL').textContent = `${CL.toFixed(3)} m`;
-    document.getElementById('lblE').textContent = `${E.toFixed(3)} m`;
-    document.getElementById('lblPC').textContent = `K${(kPC / 1000).toFixed(3)}`;
-    document.getElementById('lblPT').textContent = `K${(kPT / 1000).toFixed(3)}`;
-
-    generarCartera(d, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, signo);
-    calcularInverso();
-  }
-
-  // 3. Cartera de Puntos para replanteo
-  function generarCartera(d, kPC, kPT, nPC, ePC, nPT, ePT, nCentro, eCentro, signo) {
-    puntosLista = [];
-    const tbody = document.getElementById('tablaBody');
-    tbody.innerHTML = '';
-
-    // PC
-    puntosLista.push({ id: 1, tipo: 'PC', k: kPC, n: nPC, e: ePC, defl: '00°00\'00"' });
-
-    let kActual = Math.ceil(kPC / d.intervalo) * d.intervalo;
-    let idx = 2;
-
-    const azRadioPC = (geo.azIn + (signo * 90) + 180 + 360) % 360; // Del centro al PC
-
-    while (kActual < kPT) {
-      const s = kActual - kPC;
-      const theta = toDeg(s / d.radio);
-      const azRadial = (azRadioPC + (signo * theta) + 360) % 360;
-
-      const nPto = nCentro + d.radio * Math.cos(toRad(azRadial));
-      const ePto = eCentro + d.radio * Math.sin(toRad(azRadial));
-
-      const defl = theta / 2;
-      const deflTxt = formatGMS(defl);
-
-      puntosLista.push({ id: idx++, tipo: 'ESTACA', k: kActual, n: nPto, e: ePto, defl: deflTxt });
-      kActual += d.intervalo;
+    function normalizeAzimuth(az) {
+      let a = az % 360;
+      if (a < 0) a += 360;
+      return a;
     }
 
-    // PT
-    const deflPT = d.delta / 2;
-    puntosLista.push({ id: idx, tipo: 'PT', k: kPT, n: nPT, e: ePT, defl: formatGMS(deflPT) });
-
-    document.getElementById('lblTotalPtos').textContent = `${puntosLista.length} puntos`;
-
-    // Renderizar
-    puntosLista.forEach(p => {
-      const tr = document.createElement('tr');
-      const tag = p.tipo === 'PC' ? '<span class="tag tag-pc">PC</span>' : (p.tipo === 'PT' ? '<span class="tag tag-pt">PT</span>' : '');
-      tr.innerHTML = `
-        <td>${p.id} ${tag}</td>
-        <td>K${(p.k).toFixed(2)}</td>
-        <td>${p.n.toFixed(3)}</td>
-        <td>${p.e.toFixed(3)}</td>
-        <td>${p.defl}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // 4. Módulo Inverso: Punto -> Abscisa y Desplazamiento (Offset)
-  function calcularInverso() {
-    const n = parseFloat(document.getElementById('nPtoInv').value);
-    const e = parseFloat(document.getElementById('ePtoInv').value);
-    const resBox = document.getElementById('invResult');
-
-    if (isNaN(n) || isNaN(e) || !geo.R) {
-      resBox.style.display = 'none';
-      return;
+    function formatGMS(degrees) {
+      if (isNaN(degrees)) return '00°00\'00"';
+      let norm = normalizeAzimuth(degrees);
+      let d = Math.floor(norm);
+      let mRem = (norm - d) * 60;
+      let m = Math.floor(mRem);
+      let s = Math.round((mRem - m) * 60);
+      if (s >= 60) { s = 0; m++; }
+      if (m >= 60) { m = 0; d++; }
+      return `${String(d).padStart(2, '0')}°${String(m).padStart(2, '0')}'${String(s).padStart(2, '0')}"`;
     }
 
-    localStorage.setItem('topocurvas_inv', JSON.stringify({ n, e }));
-    resBox.style.display = 'block';
-
-    // Vector desde el centro de la curva hacia el punto
-    const dn = n - geo.nCentro;
-    const de = e - geo.eCentro;
-    const distCentro = Math.hypot(dn, de);
-
-    // Azimut del centro hacia el punto
-    let azRadialPto = toDeg(Math.atan2(de, dn));
-    if (azRadialPto < 0) azRadialPto += 360;
-
-    // Azimut del centro hacia el PC
-    let azCentroPC = toDeg(Math.atan2(geo.ePC - geo.eCentro, geo.nPC - geo.nCentro));
-    if (azCentroPC < 0) azCentroPC += 360;
-
-    // Diferencia angular en el sentido de la curva
-    let diffAng = (geo.signo === 1) ? (azRadialPto - azCentroPC) : (azCentroPC - azRadialPto);
-    diffAng = (diffAng + 360) % 360;
-
-    // Longitud de arco desde PC
-    const sProy = toRad(diffAng) * geo.R;
-    const kProy = geo.kPC + sProy;
-
-    // Desplazamiento / Ordenada (Offset respecto al eje)
-    // Positivo a la derecha del alineamiento, negativo a la izquierda
-    const offset = (geo.signo === 1) ? (distCentro - geo.R) : (geo.R - distCentro);
-
-    document.getElementById('lblInvK').textContent = `K${kProy.toFixed(2)}`;
-    document.getElementById('lblInvOffset').textContent = `${offset >= 0 ? '+' : ''}${offset.toFixed(3)} m ${offset >= 0 ? '(Der)' : '(Izq)'}`;
-
-    // Verificación de rango entre PC y PT
-    const status = document.getElementById('lblInvStatus');
-    if (kProy >= (geo.kPC - 0.001) && kProy <= (geo.kPT + 0.001)) {
-      status.textContent = '✓ DENTRO DEL RANGO DE LA CURVA (PC - PT)';
-      status.className = 'status-badge status-in';
-    } else {
-      status.textContent = '✕ FUERA DEL RANGO DE PC Y PT';
-      status.className = 'status-badge status-out';
+    function formatStation(meters) {
+      if (isNaN(meters)) return 'K0+000.00';
+      const k = Math.floor(meters / 1000);
+      const rem = meters - (k * 1000);
+      return `K${k}+${rem.toFixed(2).padStart(6, '0')}`;
     }
-  }
 
-  function formatGMS(gradosDec) {
-    const g = Math.floor(gradosDec);
-    const mDec = (gradosDec - g) * 60;
-    const m = Math.floor(mDec);
-    const s = Math.round((mDec - m) * 60);
-    return `${g}°${String(m).padStart(2, '0')}'${String(s).padStart(2, '0')}"`;
-  }
-
-  function exportarCSV() {
-    if (!puntosLista.length) return;
-    let csv = "Punto,Norte,Este,Cota,Codigo\n";
-    puntosLista.forEach(p => {
-      csv += `${p.id},${p.n.toFixed(4)},${p.e.toFixed(4)},0.000,${p.tipo}_K${p.k.toFixed(1)}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Replanteo_Curva_R${geo.R}.csv`;
-    link.click();
-  }
-
-  // Registro Reactivo en todos los inputs
-  document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', () => {
-      if (el.id === 'nPtoInv' || el.id === 'ePtoInv') {
-        calcularInverso();
-      } else {
-        calcular();
+    function initDefaultData() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          projects = JSON.parse(stored);
+        } catch (e) {
+          projects = [];
+        }
       }
-    });
-  });
 
-  // Registrar Service Worker para PWA Offline
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
-    });
-  }
+      if (!projects || projects.length === 0) {
+        // Proyectos por defecto para demostración inmediata
+        projects = [
+          {
+            id: 'proj_tolima',
+            name: 'Vía Tolima',
+            k0: 0.0,
+            interval: 10,
+            pis: [
+              { id: 'PI-0', name: 'PI 0 (Inicio)', n: 10000.000, e: 5000.000, r: 0 },
+              { id: 'PI-1', name: 'PI 1', n: 10180.000, e: 5120.000, r: 90.00 },
+              { id: 'PI-2', name: 'PI 2', n: 10250.000, e: 5350.000, r: 110.00 },
+              { id: 'PI-3', name: 'PI 3 (Fin)', n: 10120.000, e: 5550.000, r: 0 }
+            ],
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: 'proj_toledo',
+            name: 'Vía Toledo',
+            k0: 1500.0,
+            interval: 10,
+            pis: [
+              { id: 'PI-0', name: 'PI 0 (Inicio)', n: 20000.000, e: 8000.000, r: 0 },
+              { id: 'PI-1', name: 'PI 1', n: 20300.000, e: 8150.000, r: 120.00 },
+              { id: 'PI-2', name: 'PI 2 (Fin)', n: 20450.000, e: 8400.000, r: 0 }
+            ],
+            updatedAt: new Date().toISOString()
+          }
+        ];
+        saveProjectsToStorage();
+      }
+    }
 
-  // Inicializar
-  cargarDatos();
-  calcular();
-</script>
+    function saveProjectsToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    }
+
+    function computeAlignment() {
+      if (!currentProject || !currentProject.pis || currentProject.pis.length < 2) {
+        alignmentData = { elements: [], curveElements: [], rosterPoints: [], overlaps: [], totalLength: 0, endStation: currentProject ? currentProject.k0 : 0 };
+        updateUI();
+        return;
+      }
+
+      const pis = currentProject.pis;
+      const k0 = currentProject.k0 || 0;
+      const interval = currentProject.interval || 10;
+      const nPIs = pis.length;
+
+      let curveElements = [];
+      let overlaps = [];
+
+      // 1. Calcular azimutes y distancias de tangentes entre PIs sucesivos
+      let tangents = [];
+      for (let i = 0; i < nPIs - 1; i++) {
+        let pA = pis[i];
+        let pB = pis[i+1];
+        let dn = pB.n - pA.n;
+        let de = pB.e - pA.e;
+        let dist = Math.hypot(dn, de);
+        let az = toDeg(Math.atan2(de, dn));
+        if (az < 0) az += 360;
+        tangents.push({ from: i, to: i+1, dn, de, dist, az });
+      }
+
+      // 2. Calcular curvas para cada PI intermedio
+      for (let i = 1; i < nPIs - 1; i++) {
+        let tIn = tangents[i - 1];
+        let tOut = tangents[i];
+        let r = parseFloat(pis[i].r) || 0;
+
+        // Deflexión angular usando producto cruz en 2D (deIn * dnOut - dnIn * deOut)
+        // Sentido: si cruz > 0 gira a la Derecha, si < 0 a la Izquierda
+        let cross = (tIn.de * tOut.dn) - (tIn.dn * tOut.de);
+        let sentido = cross < 0 ? 'D' : 'I';
+
+        // Ángulo de deflexión Delta: diferencia angular entre azimut de salida y de entrada
+        let delta = normalizeAzimuth(tOut.az - tIn.az);
+        if (sentido === 'I') {
+          delta = 360 - delta;
+        }
+
+        let radDelta = toRad(delta);
+        let T = (r > 0 && delta > 0 && delta < 180) ? (r * Math.tan(radDelta / 2)) : 0;
+        let L = (r > 0 && delta > 0 && delta < 180) ? ((Math.PI * r * delta) / 180) : 0;
+        let CL = (r > 0) ? (2 * r * Math.sin(radDelta / 2)) : 0;
+        let E = (r > 0) ? (r * ((1 / Math.cos(radDelta / 2)) - 1)) : 0;
+
+        // Coordenadas PC retrocediendo T desde el PI actual a lo largo de la tangente de entrada
+        let azContraIn = normalizeAzimuth(tIn.az + 180);
+        let nPC = pis[i].n + T * Math.cos(toRad(azContraIn));
+        let ePC = pis[i].e + T * Math.sin(toRad(azContraIn));
+
+        // Coordenadas PT avanzando T desde el PI actual a lo largo de la tangente de salida
+        let nPT = pis[i].n + T * Math.cos(toRad(tOut.az));
+        let ePT = pis[i].e + T * Math.sin(toRad(tOut.az));
+
+        // Centro de Curvatura (perpendicular a la tangente de entrada en PC)
+        let signSide = (sentido === 'D') ? 1 : -1;
+        let azRadioPC = normalizeAzimuth(tIn.az + (signSide * 90));
+        let nCentro = nPC + r * Math.cos(toRad(azRadioPC));
+        let eCentro = ePC + r * Math.sin(toRad(azRadioPC));
+
+        curveElements.push({
+          piIndex: i,
+          piName: pis[i].name || `PI ${i}`,
+          piN: pis[i].n,
+          piE: pis[i].e,
+          azIn: tIn.az,
+          azOut: tOut.az,
+          delta,
+          sentido,
+          r,
+          T,
+          L,
+          CL,
+          E,
+          nPC,
+          ePC,
+          nPT,
+          ePT,
+          nCentro,
+          eCentro,
+          signSide,
+          azRadioPC,
+          kPC: 0, // Se llenará en la integración secuencial
+          kPT: 0
+        });
+      }
+
+      // 3. Verificación de solapamiento y asignación secuencial de Abscisas continuas
+      let currentStation = k0;
+      let elements = []; // Lista ordenada de segmentos: TANGENTE o CURVA
+      let prevPT = { n: pis[0].n, e: pis[0].e, station: k0 };
+
+      for (let i = 0; i < curveElements.length; i++) {
+        let curve = curveElements[i];
+        let tIn = tangents[curve.piIndex - 1];
+
+        // Verificar si la subtangente T excede la longitud de la tangente disponible
+        let distDesdePrevio = (i === 0) ? tIn.dist : tangents[curve.piIndex - 1].dist;
+        let tAnterior = (i === 0) ? 0 : curveElements[i - 1].T;
+
+        if (curve.T + tAnterior > distDesdePrevio) {
+          overlaps.push(`Solape en ${curve.piName}: Las subtangentes (${(curve.T + tAnterior).toFixed(2)} m) superan la distancia entre vértices (${distDesdePrevio.toFixed(2)} m). Reduzca el radio R.`);
+        }
+
+        // Entretangente previa hasta el PC
+        let entretangente = distDesdePrevio - tAnterior - curve.T;
+        if (entretangente > 0.001) {
+          let kStartTan = currentStation;
+          let kEndTan = currentStation + entretangente;
+          elements.push({
+            type: 'TANGENT',
+            name: `Entretangente ${i === 0 ? 'Inicial' : i}`,
+            kStart: kStartTan,
+            kEnd: kEndTan,
+            startN: prevPT.n,
+            startE: prevPT.e,
+            endN: curve.nPC,
+            endE: curve.ePC,
+            azimuth: tIn.az,
+            length: entretangente
+          });
+          currentStation = kEndTan;
+        }
+
+        // Asignar abscisas de PC y PT
+        curve.kPC = currentStation;
+        curve.kPT = currentStation + curve.L;
+        currentStation = curve.kPT;
+
+        // Agregar elemento Curva
+        elements.push({
+          type: 'CURVE',
+          curveData: curve,
+          name: `Curva ${curve.piName}`,
+          kStart: curve.kPC,
+          kEnd: curve.kPT,
+          length: curve.L
+        });
+
+        prevPT = { n: curve.nPT, e: curve.ePT, station: curve.kPT };
+      }
+
+      // Entretangente final hasta el último PI
+      if (tangents.length > 0) {
+        let lastTangent = tangents[tangents.length - 1];
+        let lastT = (curveElements.length > 0) ? curveElements[curveElements.length - 1].T : 0;
+        let finalStraightLength = lastTangent.dist - lastT;
+        if (finalStraightLength > 0.001) {
+          let kStartTan = currentStation;
+          let kEndTan = currentStation + finalStraightLength;
+          elements.push({
+            type: 'TANGENT',
+            name: 'Entretangente Final',
+            kStart: kStartTan,
+            kEnd: kEndTan,
+            startN: prevPT.n,
+            startE: prevPT.e,
+            endN: pis[nPIs - 1].n,
+            endE: pis[nPIs - 1].e,
+            azimuth: lastTangent.az,
+            length: finalStraightLength
+          });
+          currentStation = kEndTan;
+        }
+      }
+
+      // 4. Generación de Cartera Total de Replanteo (Eje cada X metros + Puntos Notables)
+      let rosterPoints = [];
+      let ptoCounter = 1;
+
+      // Hito K0 Inicio
+      rosterPoints.push({
+        id: ptoCounter++,
+        code: 'PI-0_INICIO',
+        k: k0,
+        n: pis[0].n,
+        e: pis[0].e,
+        defl: '00°00\'00"',
+        type: 'INICIO'
+      });
+
+      // Recorrer elementos para estacas intermedias y puntos notables
+      elements.forEach((elem) => {
+        if (elem.type === 'TANGENT') {
+          // Generar estacas de la recta si caen dentro
+          let kCur = Math.ceil(elem.kStart / interval) * interval;
+          if (kCur === elem.kStart) kCur += interval;
+          while (kCur < elem.kEnd - 0.001) {
+            let dist = kCur - elem.kStart;
+            let n = elem.startN + dist * Math.cos(toRad(elem.azimuth));
+            let e = elem.startE + dist * Math.sin(toRad(elem.azimuth));
+            rosterPoints.push({
+              id: ptoCounter++,
+              code: 'EST_RECTA',
+              k: kCur,
+              n,
+              e,
+              defl: '--',
+              type: 'RECTA'
+            });
+            kCur += interval;
+          }
+        } else if (elem.type === 'CURVE') {
+          let c = elem.curveData;
+          // PC
+          rosterPoints.push({
+            id: ptoCounter++,
+            code: `PC_${c.piName}`,
+            k: c.kPC,
+            n: c.nPC,
+            e: c.ePC,
+            defl: '00°00\'00"',
+            type: 'PC'
+          });
+
+          // Estacas dentro de la curva
+          let kCur = Math.ceil(c.kPC / interval) * interval;
+          let azRadioPC_fromCenter = normalizeAzimuth(c.azIn + (c.signSide * 90) + 180);
+
+          while (kCur < c.kPT - 0.001) {
+            let s = kCur - c.kPC;
+            let thetaDeg = toDeg(s / c.r);
+            let azRadial = normalizeAzimuth(azRadioPC_fromCenter + (c.signSide * thetaDeg));
+
+            let n = c.nCentro + c.r * Math.cos(toRad(azRadial));
+            let e = c.eCentro + c.r * Math.sin(toRad(azRadial));
+
+            let defl = thetaDeg / 2;
+            rosterPoints.push({
+              id: ptoCounter++,
+              code: `EST_CURVA`,
+              k: kCur,
+              n,
+              e,
+              defl: formatGMS(defl),
+              type: 'CURVA'
+            });
+            kCur += interval;
+          }
+
+          // PT
+          rosterPoints.push({
+            id: ptoCounter++,
+            code: `PT_${c.piName}`,
+            k: c.kPT,
+            n: c.nPT,
+            e: c.ePT,
+            defl: formatGMS(c.delta / 2),
+            type: 'PT'
+          });
+        }
+      });
+
+      // Punto Fin de la vía
+      let lastPI = pis[nPIs - 1];
+      rosterPoints.push({
+        id: ptoCounter++,
+        code: `${lastPI.name || 'FIN'}`,
+        k: currentStation,
+        n: lastPI.n,
+        e: lastPI.e,
+        defl: '--',
+        type: 'FIN'
+      });
+
+      alignmentData = {
+        elements,
+        curveElements,
+        rosterPoints,
+        overlaps,
+        totalLength: currentStation - k0,
+        endStation: currentStation
+      };
+
+      updateUI();
+    }
+
+    function getTheoreticalPoint(kTarget, offset = 0) {
+      if (!alignmentData.elements || alignmentData.elements.length === 0) return null;
+
+      // Buscar elemento donde cae kTarget
+      let elem = alignmentData.elements.find(el => kTarget >= el.kStart - 0.0001 && kTarget <= el.kEnd + 0.0001);
+      
+      // Si se pasa un poco pero está dentro de tolerancia o fuera
+      if (!elem) {
+        if (kTarget < alignmentData.elements[0].kStart) {
+          elem = alignmentData.elements[0];
+        } else {
+          elem = alignmentData.elements[alignmentData.elements.length - 1];
+        }
+      }
+
+      let nCenterline = 0;
+      let eCenterline = 0;
+      let azTangent = 0;
+      let desc = '';
+
+      if (elem.type === 'TANGENT') {
+        let dist = kTarget - elem.kStart;
+        nCenterline = elem.startN + dist * Math.cos(toRad(elem.azimuth));
+        eCenterline = elem.startE + dist * Math.sin(toRad(elem.azimuth));
+        azTangent = elem.azimuth;
+        desc = `${elem.name} (Az ${formatGMS(azTangent)})`;
+      } else if (elem.type === 'CURVE') {
+        let c = elem.curveData;
+        let s = kTarget - c.kPC;
+        let thetaDeg = toDeg(s / c.r);
+        let azRadioPC_fromCenter = normalizeAzimuth(c.azIn + (c.signSide * 90) + 180);
+        let azRadial = normalizeAzimuth(azRadioPC_fromCenter + (c.signSide * thetaDeg));
+
+        nCenterline = c.nCentro + c.r * Math.cos(toRad(azRadial));
+        eCenterline = c.eCentro + c.r * Math.sin(toRad(azRadial));
+        
+        // Azimut de la tangente local en ese punto del arco
+        azTangent = normalizeAzimuth(azRadial + (c.signSide * 90));
+        desc = `Curva de ${c.piName} (R = ${c.r.toFixed(2)} m)`;
+      }
+
+      // Aplicar Desplazamiento/Offset: +90° a la derecha de la tangente
+      let azOffset = normalizeAzimuth(azTangent + 90);
+      let nOffset = nCenterline + offset * Math.cos(toRad(azOffset));
+      let eOffset = eCenterline + offset * Math.sin(toRad(azOffset));
+
+      return {
+        n: nOffset,
+        e: eOffset,
+        nEje: nCenterline,
+        eEje: eCenterline,
+        azTangent,
+        desc
+      };
+    }
+
+    function projectPointToAlignment(nPto, ePto) {
+      if (!alignmentData.elements || alignmentData.elements.length === 0) return null;
+
+      let bestMatch = null;
+      let minDistance = Infinity;
+
+      alignmentData.elements.forEach(elem => {
+        if (elem.type === 'TANGENT') {
+          // Proyección ortogonal sobre recta finita
+          let vx = elem.endE - elem.startE;
+          let vy = elem.endN - elem.startN;
+          let lenSq = vx * vx + vy * vy;
+          if (lenSq > 0) {
+            let u = ((ePto - elem.startE) * vx + (nPto - elem.startN) * vy) / lenSq;
+            // Clamping al segmento
+            let uClamped = Math.max(0, Math.min(1, u));
+            let projN = elem.startN + uClamped * vy;
+            let projE = elem.startE + uClamped * vx;
+            let dist = Math.hypot(nPto - projN, ePto - projE);
+
+            if (dist < minDistance) {
+              minDistance = dist;
+              let kProy = elem.kStart + (u * elem.length);
+              
+              // Signo de offset con producto cruz respecto a la tangente
+              let sign = ((ePto - projE) * Math.cos(toRad(elem.azimuth)) - (nPto - projN) * Math.sin(toRad(elem.azimuth))) >= 0 ? 1 : -1;
+              let offset = dist * sign;
+
+              bestMatch = {
+                k: kProy,
+                offset,
+                elemName: elem.name,
+                inRange: (u >= -0.0001 && u <= 1.0001)
+              };
+            }
+          }
+        } else if (elem.type === 'CURVE') {
+          let c = elem.curveData;
+          let dn = nPto - c.nCentro;
+          let de = ePto - c.eCentro;
+          let distCentro = Math.hypot(dn, de);
+
+          let azRadialPto = normalizeAzimuth(toDeg(Math.atan2(de, dn)));
+          let azCentroPC = normalizeAzimuth(toDeg(Math.atan2(c.ePC - c.eCentro, c.nPC - c.nCentro)));
+
+          let diffAng = (c.signSide === 1) ? (azRadialPto - azCentroPC) : (azCentroPC - azRadialPto);
+          diffAng = normalizeAzimuth(diffAng);
+
+          let sProy = toRad(diffAng) * c.r;
+          let kProy = c.kPC + sProy;
+
+          let distCurva = Math.abs(distCentro - c.r);
+          if (distCurva < minDistance) {
+            minDistance = distCurva;
+            let offset = (c.signSide === 1) ? (distCentro - c.r) : (c.r - distCentro);
+            let inRange = (kProy >= c.kPC - 0.001 && kProy <= c.kPT + 0.001);
+
+            bestMatch = {
+              k: kProy,
+              offset,
+              elemName: `Curva ${c.piName}`,
+              inRange
+            };
+          }
+        }
+      });
+
+      return bestMatch;
+    }
+
+    function renderProjectsList() {
+      const grid = document.getElementById('projectsGrid');
+      grid.innerHTML = '';
+
+      if (projects.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full p-8 text-center bg-tactical-800 border border-dashed border-tactical-700 rounded-xl">
+            <p class="text-sm text-tactical-muted">No tienes proyectos registrados aún.</p>
+            <p class="text-xs text-tactical-muted mt-1">Presiona "Crear Nuevo Proyecto" para empezar a diseñar tu alineamiento.</p>
+          </div>
+        `;
+        return;
+      }
+
+      projects.forEach(p => {
+        let totalPIs = p.pis ? p.pis.length : 0;
+        let curvesCount = p.pis ? p.pis.filter((pi, idx) => idx > 0 && idx < p.pis.length - 1 && pi.r > 0).length : 0;
+        
+        let card = document.createElement('div');
+        card.className = 'bg-tactical-800 border border-tactical-700 rounded-xl p-4 shadow hover:border-tactical-accent transition-all flex flex-col justify-between group';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-base font-bold text-tactical-text group-hover:text-tactical-accent transition-colors">${p.name}</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-tactical-750 border border-tactical-700 mono text-tactical-gold">K0 = ${(p.k0 || 0).toFixed(0)}m</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-tactical-700/60 text-xs mono">
+              <div>
+                <span class="text-[10px] text-tactical-muted block uppercase">Vértices</span>
+                <span class="text-tactical-text font-bold">${totalPIs} PIs</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-tactical-muted block uppercase">Curvas</span>
+                <span class="text-tactical-accent font-bold">${curvesCount} circulares</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-4 pt-3 border-t border-tactical-700/60">
+            <button class="btn-open-proj flex-1 py-2 rounded-lg bg-tactical-750 hover:bg-tactical-accent hover:text-tactical-900 border border-tactical-700 hover:border-tactical-accent text-xs font-bold uppercase tracking-wider text-tactical-text transition-all text-center" data-id="${p.id}">
+              Abrir Proyecto
+            </button>
+            <button class="btn-del-proj p-2 rounded-lg bg-tactical-750 border border-tactical-700 hover:border-red-600 hover:text-red-400 text-tactical-muted text-xs transition-colors" title="Eliminar proyecto" data-id="${p.id}">
+              &#128465;
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Listeners de abrir y eliminar
+      document.querySelectorAll('.btn-open-proj').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          let id = e.currentTarget.getAttribute('data-id');
+          openProject(id);
+        });
+      });
+
+      document.querySelectorAll('.btn-del-proj').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          let id = e.currentTarget.getAttribute('data-id');
+          deleteProject(id);
+        });
+      });
+    }
+
+    function openProject(id) {
+      currentProject = projects.find(p => p.id === id);
+      if (!currentProject) return;
+
+      localStorage.setItem(ACTIVE_PROJECT_KEY, id);
+
+      document.getElementById('viewProjects').classList.add('hidden');
+      document.getElementById('viewWorkbench').classList.remove('hidden');
+      document.getElementById('btnBackToProjects').classList.remove('hidden');
+      document.getElementById('projectStatusBadge').classList.remove('hidden');
+      document.getElementById('projectStatusBadge').textContent = currentProject.name;
+      document.getElementById('headerSubtitle').textContent = `Proyecto en curso: ${currentProject.name}`;
+
+      document.getElementById('currentProjectTitle').textContent = currentProject.name;
+      document.getElementById('inputK0').value = currentProject.k0 || 0;
+      document.getElementById('inputInterval').value = currentProject.interval || 10;
+
+      computeAlignment();
+    }
+
+    function closeCurrentProject() {
+      currentProject = null;
+      localStorage.removeItem(ACTIVE_PROJECT_KEY);
+      document.getElementById('viewWorkbench').classList.add('hidden');
+      document.getElementById('viewProjects').classList.remove('hidden');
+      document.getElementById('btnBackToProjects').classList.add('hidden');
+      document.getElementById('projectStatusBadge').classList.add('hidden');
+      document.getElementById('headerSubtitle').textContent = 'Gestión de Trazados y Curvas Viales';
+      renderProjectsList();
+    }
+
+    function deleteProject(id) {
+      let p = projects.find(item => item.id === id);
+      if (!p) return;
+      if (projects.length <= 1) {
+        showTemporaryNotice("Debe existir al menos un proyecto vial en la lista.");
+        return;
+      }
+      projects = projects.filter(item => item.id !== id);
+      saveProjectsToStorage();
+      renderProjectsList();
+    }
+
+    function renderPICards() {
+      const container = document.getElementById('piCardsContainer');
+      container.innerHTML = '';
+
+      if (!currentProject || !currentProject.pis) return;
+
+      currentProject.pis.forEach((pi, index) => {
+        const isStart = (index === 0);
+        const isEnd = (index === currentProject.pis.length - 1);
+        const isMiddle = (!isStart && !isEnd);
+        
+        let curveInfo = isMiddle ? alignmentData.curveElements.find(c => c.piIndex === index) : null;
+
+        let card = document.createElement('div');
+        card.className = 'bg-tactical-800 border border-tactical-700 rounded-xl p-3.5 shadow-sm space-y-3';
+        
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-tactical-700/60 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${isStart ? 'bg-tactical-accent' : (isEnd ? 'bg-tactical-gold' : 'bg-tactical-text')}"></span>
+              <span class="text-xs font-bold uppercase mono text-tactical-text">${pi.name || `PI ${index}`}</span>
+              ${isStart ? '<span class="text-[9px] bg-tactical-accent/20 text-tactical-accent px-1.5 py-0.5 rounded font-bold">K0 INICIO</span>' : ''}
+              ${isEnd ? '<span class="text-[9px] bg-tactical-gold/20 text-tactical-gold px-1.5 py-0.5 rounded font-bold">FIN VÍA</span>' : ''}
+            </div>
+            ${!isStart && currentProject.pis.length > 2 ? `
+              <button class="btn-del-pi text-[11px] text-tactical-muted hover:text-red-400 px-2 py-0.5 rounded border border-transparent hover:border-red-800/60" data-idx="${index}" title="Eliminar este PI">
+                &times; Eliminar
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Norte (m)</label>
+              <input type="number" step="0.001" value="${pi.n}" class="input-pi-n w-full bg-tactical-750 border border-tactical-700 rounded px-2 py-1 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" data-idx="${index}" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-tactical-muted font-bold uppercase">Este (m)</label>
+              <input type="number" step="0.001" value="${pi.e}" class="input-pi-e w-full bg-tactical-750 border border-tactical-700 rounded px-2 py-1 text-xs mono text-tactical-text focus:outline-none focus:border-tactical-accent" data-idx="${index}" />
+            </div>
+            ${isMiddle ? `
+              <div>
+                <label class="block text-[10px] text-tactical-accent font-bold uppercase">Radio R (m)</label>
+                <input type="number" step="0.01" min="0" value="${pi.r || 0}" class="input-pi-r w-full bg-tactical-750 border border-tactical-accent/60 rounded px-2 py-1 text-xs mono text-tactical-gold font-bold focus:outline-none focus:border-tactical-accent" data-idx="${index}" />
+              </div>
+            ` : `
+              <div class="hidden sm:block">
+                <span class="block text-[10px] text-tactical-muted font-bold uppercase">Parámetro</span>
+                <span class="text-xs text-tactical-muted mono py-1 block">Vértice de Paso</span>
+              </div>
+            `}
+          </div>
+
+          ${curveInfo ? `
+            <div class="bg-tactical-750 border border-tactical-700/60 p-2.5 rounded-lg text-xs mono">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                <div><span class="text-tactical-muted block">Deflexión Δ:</span> <span class="text-tactical-text font-bold">${formatGMS(curveInfo.delta)} (${curveInfo.sentido})</span></div>
+                <div><span class="text-tactical-muted block">Subtangente T:</span> <span class="text-tactical-gold font-bold">${curveInfo.T.toFixed(3)} m</span></div>
+                <div><span class="text-tactical-muted block">Longitud L:</span> <span class="text-tactical-accent font-bold">${curveInfo.L.toFixed(3)} m</span></div>
+                <div><span class="text-tactical-muted block">Cuerda Larga:</span> <span class="text-tactical-text font-bold">${curveInfo.CL.toFixed(3)} m</span></div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-tactical-700/60 text-[11px]">
+                <div><span class="text-tactical-muted">PC:</span> <span class="text-tactical-gold font-bold">${formatStation(curveInfo.kPC)}</span> <span class="text-[10px] text-tactical-muted">(${curveInfo.nPC.toFixed(2)}, ${curveInfo.ePC.toFixed(2)})</span></div>
+                <div><span class="text-tactical-muted">PT:</span> <span class="text-tactical-gold font-bold">${formatStation(curveInfo.kPT)}</span> <span class="text-[10px] text-tactical-muted">(${curveInfo.nPT.toFixed(2)}, ${curveInfo.ePT.toFixed(2)})</span></div>
+              </div>
+            </div>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+
+      // Listeners de edición reactiva en inputs de PIs
+      document.querySelectorAll('.input-pi-n').forEach(input => {
+        input.addEventListener('input', (e) => {
+          let idx = parseInt(e.target.getAttribute('data-idx'));
+          currentProject.pis[idx].n = parseFloat(e.target.value) || 0;
+          currentProject.updatedAt = new Date().toISOString();
+          saveProjectsToStorage();
+          computeAlignment();
+        });
+      });
+
+      document.querySelectorAll('.input-pi-e').forEach(input => {
+        input.addEventListener('input', (e) => {
+          let idx = parseInt(e.target.getAttribute('data-idx'));
+          currentProject.pis[idx].e = parseFloat(e.target.value) || 0;
+          currentProject.updatedAt = new Date().toISOString();
+          saveProjectsToStorage();
+          computeAlignment();
+        });
+      });
+
+      document.querySelectorAll('.input-pi-r').forEach(input => {
+        input.addEventListener('input', (e) => {
+          let idx = parseInt(e.target.getAttribute('data-idx'));
+          currentProject.pis[idx].r = parseFloat(e.target.value) || 0;
+          currentProject.updatedAt = new Date().toISOString();
+          saveProjectsToStorage();
+          computeAlignment();
+        });
+      });
+
+      document.querySelectorAll('.btn-del-pi').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          let idx = parseInt(e.currentTarget.getAttribute('data-idx'));
+          currentProject.pis.splice(idx, 1);
+          currentProject.updatedAt = new Date().toISOString();
+          saveProjectsToStorage();
+          computeAlignment();
+        });
+      });
+    }
+
+    function updateUI() {
+      // 1. Resumen Geometría
+      document.getElementById('kpiTotalLength').textContent = `${alignmentData.totalLength.toFixed(3)} m`;
+      document.getElementById('kpiFinalStation').textContent = formatStation(alignmentData.endStation);
+      document.getElementById('kpiTotalPIs').textContent = currentProject && currentProject.pis ? currentProject.pis.length : 0;
+      document.getElementById('kpiTotalCurves').textContent = alignmentData.curveElements ? alignmentData.curveElements.length : 0;
+
+      // 2. Alertas de solapamiento
+      const alertBox = document.getElementById('overlapAlertBox');
+      const alertList = document.getElementById('overlapAlertList');
+      alertList.innerHTML = '';
+      if (alignmentData.overlaps && alignmentData.overlaps.length > 0) {
+        alertBox.classList.remove('hidden');
+        alignmentData.overlaps.forEach(msg => {
+          let li = document.createElement('li');
+          li.textContent = msg;
+          alertList.appendChild(li);
+        });
+      } else {
+        alertBox.classList.add('hidden');
+      }
+
+      // 3. Renderizar PIs
+      renderPICards();
+
+      // 4. Renderizar Botones rápidos de Estación en Replanteo
+      renderQuickStationButtons();
+
+      // 5. Renderizar Cartera
+      renderRosterTable();
+
+      // 6. Recalcular Replanteo e Inverso si hay valores ingresados
+      recalculateStakeout();
+      recalculateInverse();
+    }
+
+    function renderQuickStationButtons() {
+      const btnContainer = document.getElementById('quickStationButtons');
+      btnContainer.innerHTML = '';
+
+      if (!currentProject || !currentProject.pis) return;
+
+      // Botón K0
+      let bK0 = document.createElement('button');
+      bK0.className = 'px-2 py-1 rounded bg-tactical-700 hover:bg-tactical-accent hover:text-tactical-900 text-[10px] font-bold mono transition-colors';
+      bK0.textContent = 'K0 (PI 0)';
+      bK0.onclick = () => setStationCoords(currentProject.pis[0].n, currentProject.pis[0].e, 'PI 0 (K0)');
+      btnContainer.appendChild(bK0);
+
+      // Botones de PCs y PTs calculados
+      alignmentData.curveElements.forEach((c) => {
+        let bPC = document.createElement('button');
+        bPC.className = 'px-2 py-1 rounded bg-tactical-700 hover:bg-tactical-accent hover:text-tactical-900 text-[10px] font-bold mono transition-colors';
+        bPC.textContent = `PC-${c.piName}`;
+        bPC.onclick = () => setStationCoords(c.nPC, c.ePC, `PC ${c.piName}`);
+        btnContainer.appendChild(bPC);
+
+        let bPT = document.createElement('button');
+        bPT.className = 'px-2 py-1 rounded bg-tactical-700 hover:bg-tactical-accent hover:text-tactical-900 text-[10px] font-bold mono transition-colors';
+        bPT.textContent = `PT-${c.piName}`;
+        bPT.onclick = () => setStationCoords(c.nPT, c.ePT, `PT ${c.piName}`);
+        btnContainer.appendChild(bPT);
+      });
+    }
+
+    function setStationCoords(n, e, name) {
+      document.getElementById('stnNorth').value = n.toFixed(3);
+      document.getElementById('stnEast').value = e.toFixed(3);
+      document.getElementById('stnName').value = name;
+      recalculateStakeout();
+    }
+
+    function recalculateStakeout() {
+      const stnN = parseFloat(document.getElementById('stnNorth').value);
+      const stnE = parseFloat(document.getElementById('stnEast').value);
+      const stkK = parseFloat(document.getElementById('stkStation').value);
+      const stkOff = parseFloat(document.getElementById('stkOffset').value) || 0;
+      const readHD = parseFloat(document.getElementById('stkMeasuredHD').value);
+
+      const resNorth = document.getElementById('stkResNorth');
+      const resEast = document.getElementById('stkResEast');
+      const resAz = document.getElementById('stkResAzimuth');
+      const resHD = document.getElementById('stkResHD');
+      const segTag = document.getElementById('stkSegmentTag');
+      const feedbackBadge = document.getElementById('stakeoutFeedbackBadge');
+      const diffText = document.getElementById('stkDiffDeltaText');
+
+      if (isNaN(stkK) || !alignmentData.elements || alignmentData.elements.length === 0) {
+        resNorth.textContent = '0.000 m';
+        resEast.textContent = '0.000 m';
+        resAz.textContent = '00°00\'00"';
+        resHD.textContent = '0.000 m';
+        segTag.textContent = 'Tramo: Ingrese una abscisa válida';
+        feedbackBadge.className = 'p-3 rounded-lg bg-tactical-750 border border-tactical-700 text-center';
+        diffText.textContent = 'INGRESE DH LEÍDA';
+        diffText.className = 'text-sm sm:text-base font-extrabold mono block mt-0.5 text-tactical-text';
+        return;
+      }
+
+      const target = getTheoreticalPoint(stkK, stkOff);
+      if (!target) return;
+
+      resNorth.textContent = `${target.n.toFixed(3)} m`;
+      resEast.textContent = `${target.e.toFixed(3)} m`;
+      segTag.textContent = `Tramo: ${target.desc} | Eje: (${target.nEje.toFixed(2)}, ${target.eEje.toFixed(2)})`;
+
+      if (isNaN(stnN) || isNaN(stnE)) {
+        resAz.textContent = 'Estación vacía';
+        resHD.textContent = 'Estación vacía';
+        return;
+      }
+
+      // Vector desde la Estación hasta el punto a replantear
+      let dn = target.n - stnN;
+      let de = target.e - stnE;
+      let theoHD = Math.hypot(dn, de);
+      let theoAz = normalizeAzimuth(toDeg(Math.atan2(de, dn)));
+
+      resAz.textContent = formatGMS(theoAz);
+      resHD.textContent = `${theoHD.toFixed(3)} m`;
+
+      // Evaluación con DH leída en campo
+      if (isNaN(readHD)) {
+        feedbackBadge.className = 'p-3 rounded-lg bg-tactical-750 border border-tactical-700 text-center';
+        diffText.textContent = `DH TEÓRICA = ${theoHD.toFixed(3)} m`;
+        diffText.className = 'text-sm sm:text-base font-extrabold mono block mt-0.5 text-tactical-gold';
+        return;
+      }
+
+      // Diferencia: si theoHD > readHD => falta distancia => ALEJAR el prisma
+      // Si readHD > theoHD => se pasó => ACERCAR el prisma
+      let delta = theoHD - readHD;
+      let absDelta = Math.abs(delta);
+
+      if (absDelta <= 0.003) {
+        feedbackBadge.className = 'p-3 rounded-lg bg-emerald-950/80 border-2 border-emerald-500 text-center';
+        diffText.textContent = '★ ¡EN CLAVO! (0.000 m)';
+        diffText.className = 'text-base sm:text-lg font-black mono block mt-0.5 text-emerald-400';
+      } else if (delta > 0) {
+        feedbackBadge.className = 'p-3 rounded-lg bg-amber-950/70 border-2 border-amber-600 text-center';
+        diffText.textContent = `ALEJAR ${absDelta.toFixed(3)} m`;
+        diffText.className = 'text-base sm:text-lg font-black mono block mt-0.5 text-amber-300';
+      } else {
+        feedbackBadge.className = 'p-3 rounded-lg bg-sky-950/70 border-2 border-sky-600 text-center';
+        diffText.textContent = `ACERCAR ${absDelta.toFixed(3)} m`;
+        diffText.className = 'text-base sm:text-lg font-black mono block mt-0.5 text-sky-300';
+      }
+    }
+
+    function recalculateInverse() {
+      const invN = parseFloat(document.getElementById('invNorth').value);
+      const invE = parseFloat(document.getElementById('invEast').value);
+
+      const resStation = document.getElementById('invResStation');
+      const resRaw = document.getElementById('invResChainageRaw');
+      const resOffset = document.getElementById('invResOffset');
+      const resSide = document.getElementById('invResSide');
+      const statusBadge = document.getElementById('invStatusBadge');
+
+      if (isNaN(invN) || isNaN(invE) || !alignmentData.elements || alignmentData.elements.length === 0) {
+        resStation.textContent = 'K0+000.00';
+        resRaw.textContent = '--';
+        resOffset.textContent = '0.000 m';
+        resSide.textContent = 'En Eje Central';
+        statusBadge.className = 'mt-3 p-2.5 rounded-lg border border-tactical-700 text-xs font-bold text-center mono bg-tactical-750 text-tactical-muted';
+        statusBadge.textContent = 'Esperando coordenadas...';
+        return;
+      }
+
+      const match = projectPointToAlignment(invN, invE);
+      if (!match) return;
+
+      resStation.textContent = formatStation(match.k);
+      resRaw.textContent = `Progresiva Real: ${match.k.toFixed(3)} m | ${match.elemName}`;
+
+      let offAbs = Math.abs(match.offset);
+      let sideStr = 'En Eje Central (0.000)';
+      if (match.offset > 0.001) sideStr = 'DERECHA del Eje (+)';
+      else if (match.offset < -0.001) sideStr = 'IZQUIERDA del Eje (-)';
+
+      resOffset.textContent = `${match.offset >= 0 ? '+' : ''}${match.offset.toFixed(3)} m`;
+      resSide.textContent = sideStr;
+
+      // Validación de rango respecto al inicio (k0) y fin de la vía
+      let k0 = currentProject.k0 || 0;
+      let kEnd = alignmentData.endStation;
+
+      if (match.k < k0 - 0.01) {
+        statusBadge.className = 'mt-3 p-2.5 rounded-lg border border-red-700 bg-red-950/70 text-xs font-bold text-center mono text-red-300';
+        statusBadge.textContent = `✕ FUERA DE RANGO: ${(k0 - match.k).toFixed(2)} m ANTES DEL INICIO DE LA VÍA (K0)`;
+      } else if (match.k > kEnd + 0.01) {
+        statusBadge.className = 'mt-3 p-2.5 rounded-lg border border-red-700 bg-red-950/70 text-xs font-bold text-center mono text-red-300';
+        statusBadge.textContent = `✕ FUERA DE RANGO: ${(match.k - kEnd).toFixed(2)} m DESPUÉS DEL FIN DE LA VÍA`;
+      } else {
+        statusBadge.className = 'mt-3 p-2.5 rounded-lg border border-emerald-600 bg-emerald-950/70 text-xs font-bold text-center mono text-emerald-300';
+        statusBadge.textContent = `✓ DENTRO DEL TRAZADO VIAL (${match.elemName})`;
+      }
+    }
+
+    function renderRosterTable() {
+      const tbody = document.getElementById('rosterTableBody');
+      tbody.innerHTML = '';
+
+      if (!alignmentData.rosterPoints || alignmentData.rosterPoints.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-tactical-muted">No hay puntos calculados</td></tr>`;
+        return;
+      }
+
+      alignmentData.rosterPoints.forEach(p => {
+        let tr = document.createElement('tr');
+        tr.className = 'hover:bg-tactical-700/50 transition-colors';
+        
+        let typeBadge = '';
+        if (p.type === 'PC') typeBadge = '<span class="px-1.5 py-0.5 rounded bg-tactical-accent/20 text-tactical-accent font-bold text-[9px]">PC</span>';
+        else if (p.type === 'PT') typeBadge = '<span class="px-1.5 py-0.5 rounded bg-tactical-gold/20 text-tactical-gold font-bold text-[9px]">PT</span>';
+        else if (p.type === 'INICIO' || p.type === 'FIN') typeBadge = '<span class="px-1.5 py-0.5 rounded bg-tactical-muted/20 text-tactical-text font-bold text-[9px]">HITO</span>';
+
+        tr.innerHTML = `
+          <td class="p-2.5 text-left text-tactical-text font-bold">${p.id}</td>
+          <td class="p-2.5 text-left text-tactical-gold">${formatStation(p.k)}</td>
+          <td class="p-2.5 text-tactical-text">${p.n.toFixed(3)}</td>
+          <td class="p-2.5 text-tactical-text">${p.e.toFixed(3)}</td>
+          <td class="p-2.5 text-tactical-muted text-[11px]">${p.code} ${typeBadge}</td>
+          <td class="p-2.5 text-tactical-accent">${p.defl}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportToCSV() {
+      if (!alignmentData.rosterPoints || alignmentData.rosterPoints.length === 0) {
+        showTemporaryNotice("No hay puntos para exportar.");
+        return;
+      }
+
+      let csv = "Punto,Norte,Este,Cota,Codigo\r\n";
+      alignmentData.rosterPoints.forEach(p => {
+        csv += `${p.id},${p.n.toFixed(4)},${p.e.toFixed(4)},0.000,${p.code}\r\n`;
+      });
+
+      let filename = `${(currentProject.name || 'Via').replace(/\s+/g, '_')}_Replanteo.csv`;
+      let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    function showTemporaryNotice(text) {
+      let msg = document.createElement('div');
+      msg.className = 'fixed bottom-5 right-5 z-50 bg-tactical-800 border border-tactical-accent text-tactical-text text-xs px-4 py-3 rounded-lg shadow-xl mono';
+      msg.textContent = text;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3500);
+    }
+
+    // Pestañas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('bg-tactical-accent', 'text-tactical-900');
+          b.classList.add('bg-tactical-800', 'text-tactical-muted', 'border', 'border-tactical-700');
+        });
+        btn.classList.add('bg-tactical-accent', 'text-tactical-900');
+        btn.classList.remove('bg-tactical-800', 'text-tactical-muted', 'border', 'border-tactical-700');
+
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(tabId).classList.remove('hidden');
+      });
+    });
+
+    // Botón volver a proyectos
+    document.getElementById('btnBackToProjects').addEventListener('click', closeCurrentProject);
+
+    // Modal nuevo proyecto
+    const modal = document.getElementById('modalNewProject');
+    document.getElementById('btnOpenNewProjectModal').addEventListener('click', () => {
+      document.getElementById('newProjName').value = `Vía Proyecto ${projects.length + 1}`;
+      document.getElementById('newProjK0').value = '0.00';
+      document.getElementById('newProjInterval').value = '10';
+      document.getElementById('newProjN0').value = '1000.000';
+      document.getElementById('newProjE0').value = '1000.000';
+      modal.classList.remove('hidden');
+    });
+
+    const closeModal = () => modal.classList.add('hidden');
+    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+
+    document.getElementById('btnSaveProject').addEventListener('click', () => {
+      let name = document.getElementById('newProjName').value.trim() || `Vía ${projects.length + 1}`;
+      let k0 = parseFloat(document.getElementById('newProjK0').value) || 0;
+      let interval = parseFloat(document.getElementById('newProjInterval').value) || 10;
+      let n0 = parseFloat(document.getElementById('newProjN0').value) || 1000;
+      let e0 = parseFloat(document.getElementById('newProjE0').value) || 1000;
+
+      let newId = `proj_${Date.now()}`;
+      let newProj = {
+        id: newId,
+        name,
+        k0,
+        interval,
+        pis: [
+          { id: 'PI-0', name: 'PI 0 (Inicio)', n: n0, e: e0, r: 0 },
+          { id: 'PI-1', name: 'PI 1', n: n0 + 150, e: e0 + 80, r: 80 },
+          { id: 'PI-2', name: 'PI 2 (Fin)', n: n0 + 300, e: e0 + 200, r: 0 }
+        ],
+        updatedAt: new Date().toISOString()
+      };
+
+      projects.unshift(newProj);
+      saveProjectsToStorage();
+      closeModal();
+      renderProjectsList();
+      openProject(newId);
+    });
+
+    // Agregar PI nuevo al final
+    document.getElementById('btnAddPI').addEventListener('click', () => {
+      if (!currentProject) return;
+      let count = currentProject.pis.length;
+      let lastPI = currentProject.pis[count - 1];
+
+      // Convertir el anterior último PI en intermedio con radio por defecto
+      if (count >= 2) {
+        let prevLast = currentProject.pis[count - 1];
+        if (!prevLast.r || prevLast.r <= 0) prevLast.r = 80.0;
+        prevLast.name = `PI ${count - 1}`;
+      }
+
+      // Nuevo PI final
+      currentProject.pis.push({
+        id: `PI-${count}`,
+        name: `PI ${count} (Fin)`,
+        n: lastPI.n + 120.0,
+        e: lastPI.e + 100.0,
+        r: 0
+      });
+
+      currentProject.updatedAt = new Date().toISOString();
+      saveProjectsToStorage();
+      computeAlignment();
+    });
+
+    // Inputs de parámetros base
+    document.getElementById('inputK0').addEventListener('input', (e) => {
+      if (!currentProject) return;
+      currentProject.k0 = parseFloat(e.target.value) || 0;
+      saveProjectsToStorage();
+      computeAlignment();
+    });
+
+    document.getElementById('inputInterval').addEventListener('input', (e) => {
+      if (!currentProject) return;
+      currentProject.interval = parseFloat(e.target.value) || 10;
+      saveProjectsToStorage();
+      computeAlignment();
+    });
+
+    // Listeners de Replanteo
+    ['stnNorth', 'stnEast', 'stkStation', 'stkOffset', 'stkMeasuredHD'].forEach(id => {
+      document.getElementById(id).addEventListener('input', recalculateStakeout);
+    });
+
+    // Listeners de Inverso
+    ['invNorth', 'invEast'].forEach(id => {
+      document.getElementById(id).addEventListener('input', recalculateInverse);
+    });
+
+    // Exportación CSV
+    document.getElementById('btnExportCSV').addEventListener('click', exportToCSV);
+
+    // Registro de Service Worker para PWA Offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW reg fail:', err));
+      });
+    }
+
+    // Inicialización al arrancar
+    initDefaultData();
+    renderProjectsList();
+
+    // Reanudar proyecto activo si existe en memoria
+    let activeId = localStorage.getItem(ACTIVE_PROJECT_KEY);
+    if (activeId && projects.some(p => p.id === activeId)) {
+      openProject(activeId);
+    }
+  </script>
 </body>
 </html>
